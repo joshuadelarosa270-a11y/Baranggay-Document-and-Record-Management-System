@@ -1,0 +1,236 @@
+/* ==========================================================================
+   BDRMS — Printable Certificate Styles
+   Barangay Wawa, Abra de Ilog, Occidental Mindoro
+   ========================================================================== */
+
+.certificate {
+  background: #ffffff;
+  color: #111827;
+  padding: 48px 56px;
+  font-family: 'Times New Roman', Times, serif;
+  line-height: 1.6;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid #e5e7eb;
+}
+
+.certificate::before {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  border: 2px solid #1e3a8a;
+  pointer-events: none;
+}
+
+.certificate::after {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  border: 1px dashed #93c5fd;
+  pointer-events: none;
+}
+
+.cert-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 2px double #1e3a8a;
+}
+
+.cert-head p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.cert-head h4 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  letter-spacing: 0.05em;
+  margin: 6px 0 2px;
+}
+
+.cert-office {
+  font-size: 0.85rem !important;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #4b5563;
+}
+
+.cert-seal {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid #1e3a8a;
+  display: grid;
+  place-items: center;
+  color: #1e3a8a;
+  flex-shrink: 0;
+}
+.cert-seal svg {
+  width: 44px;
+  height: 44px;
+}
+.cert-seal.alt {
+  border-color: #d97706;
+  color: #d97706;
+}
+
+.cert-title {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1e3a8a;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 24px 0 32px;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+}
+
+.cert-to {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 18px;
+  color: #111827;
+}
+
+.cert-body {
+  font-size: 1.08rem;
+  text-align: justify;
+  text-justify: inter-word;
+}
+.cert-body p {
+  margin-bottom: 18px;
+  text-indent: 40px;
+  line-height: 1.7;
+}
+
+.cert-sign {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-top: 56px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+.cert-sign .line {
+  width: 80%;
+  height: 1px;
+  background: #111827;
+  margin: 40px auto 8px;
+}
+
+.cert-sign b {
+  display: block;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+
+.cert-sign span {
+  display: block;
+  font-size: 0.85rem;
+  color: #4b5563;
+}
+
+.cert-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: rgba(30, 58, 138, 0.04);
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.15em;
+  font-family: sans-serif;
+  user-select: none;
+}
+
+.cert-meta-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 36px;
+  padding-top: 16px;
+  border-top: 1px dashed #cbd5e1;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.dry-seal-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px dashed #94a3b8;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 8px;
+  font-size: 0.62rem;
+  color: #64748b;
+  font-family: sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+}
+
+.cert-foot {
+  margin-top: 18px;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.74rem;
+  color: #6b7280;
+  font-family: sans-serif;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Print Media Query */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .modal-backdrop, .modal {
+    position: static !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    inset: auto !important;
+    overflow: visible !important;
+  }
+  .modal-head, .modal-foot {
+    display: none !important;
+  }
+  .modal-body {
+    padding: 0 !important;
+  }
+  .certificate, .certificate * {
+    visibility: visible;
+  }
+  .certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 30px 40px;
+    border: none;
+    box-shadow: none;
+  }
+}

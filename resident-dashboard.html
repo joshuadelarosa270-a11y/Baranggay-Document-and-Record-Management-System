@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resident Dashboard — Barangay Wawa</title>
+  <meta name="description" content="Personal document management dashboard for registered residents of Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/print.css">
+  <style>
+    .res-dash-header {
+      background: linear-gradient(180deg, #091325, #060b17);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+    }
+    .profile-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .res-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .res-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--grad-primary);
+      color: #031512;
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: var(--font-display);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow-glow);
+    }
+    .res-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 32px 0;
+    }
+    .req-list-card {
+      padding: 24px;
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+      transition: border-color .2s, transform .2s;
+    }
+    .req-list-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+    .dash-tabs {
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .dash-tab-btn {
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all .2s;
+    }
+    .dash-tab-btn.active {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="nav scrolled">
+    <div class="container nav-inner">
+      <a href="index.html" class="brand">
+        <div class="seal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/><path d="M12 2v3"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <strong>Barangay Wawa</strong>
+          <span>Resident Portal</span>
+        </div>
+      </a>
+
+      <div class="nav-cta">
+        <a href="index.html" class="btn btn-ghost btn-sm">Public Website</a>
+        <button class="btn btn-danger btn-sm" id="btnResidentLogout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Resident Header Banner -->
+  <div class="res-dash-header" style="margin-top: 76px;">
+    <div class="container profile-hero">
+      <div class="res-profile">
+        <div class="res-avatar" id="dashAvatar">M</div>
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <h2 id="dashName" style="font-size: 1.45rem;">Resident Name</h2>
+            <span class="badge badge-released">Verified Resident</span>
+          </div>
+          <p class="muted" style="font-size: 0.86rem; margin-top: 3px;">
+            <span id="dashPurok">Purok 1</span> • Length of Residency: <b id="dashResidencyDuration" style="color:var(--text);">10 Years</b>
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <button class="btn btn-primary" id="btnOpenNewRequestModal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M12 5v14M5 12h14"/></svg>
+          Apply for New Document
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dashboard Body -->
+  <main class="container" style="padding: 30px 0 60px;">
+    <!-- Metric Cards -->
+    <div class="res-stats-grid">
+      <div class="glass card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem;">Total Requests Filed</span>
+        <strong id="dashTotalCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); margin-top: 4px;">0</strong>
+      </div>
+      <div class="glass card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem;">Currently Processing</span>
+        <strong id="dashPendingCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); color: var(--gold); margin-top: 4px;">0</strong>
+      </div>
+      <div class="glass card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem;">Ready for Pickup at Hall</span>
+        <strong id="dashReadyCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); color: var(--primary); margin-top: 4px;">0</strong>
+      </div>
+      <div class="glass card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem;">Claimed & Released</span>
+        <strong id="dashReleasedCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); color: var(--success); margin-top: 4px;">0</strong>
+      </div>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="dash-tabs">
+      <button class="dash-tab-btn active" id="tabMyRequests">My Document Requests</button>
+      <button class="dash-tab-btn" id="tabProfileDetails">Resident Profile & Credentials</button>
+    </div>
+
+    <!-- Section 1: My Requests -->
+    <div id="paneMyRequests">
+      <div id="requestsListContainer">
+        <!-- Dynamically rendered -->
+      </div>
+    </div>
+
+    <!-- Section 2: Profile Details -->
+    <div id="paneProfile" class="hidden">
+      <div class="glass card" style="max-width: 680px;">
+        <h3 style="margin-bottom: 18px; font-size: 1.2rem;">Official Resident Registry Profile</h3>
+        <div class="kv-list" id="profileDetailsList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/store.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auth Guard
+      const resident = BDRMS.currentResident();
+      if (!resident) {
+        window.location.href = 'resident-login.html';
+        return;
+      }
+
+      initResidentDashboard(resident);
+    });
+
+    function initResidentDashboard(resident) {
+      // Populate Profile Banner
+      document.getElementById('dashAvatar').innerText = resident.firstName.charAt(0);
+      document.getElementById('dashName').innerText = BDRMS.fullName(resident);
+      document.getElementById('dashPurok').innerText = `${resident.purok}, Barangay Wawa`;
+      document.getElementById('dashResidencyDuration').innerText = BDRMS.residencyText(resident.residentSince);
+
+      renderResidentRequests(resident);
+
+      // Logout handler
+      document.getElementById('btnResidentLogout').addEventListener('click', () => {
+        BDRMS.logoutResident();
+        BDRMS.toast('Logged out of resident portal.');
+        setTimeout(() => window.location.href = 'resident-login.html', 400);
+      });
+
+      // Tab switcher
+      const tabReq = document.getElementById('tabMyRequests');
+      const tabProf = document.getElementById('tabProfileDetails');
+      const paneReq = document.getElementById('paneMyRequests');
+      const paneProf = document.getElementById('paneProfile');
+
+      tabReq.addEventListener('click', () => {
+        tabReq.classList.add('active');
+        tabProf.classList.remove('active');
+        paneReq.classList.remove('hidden');
+        paneProf.classList.add('hidden');
+      });
+
+      tabProf.addEventListener('click', () => {
+        tabProf.classList.add('active');
+        tabReq.classList.remove('active');
+        paneProf.classList.remove('hidden');
+        paneReq.classList.add('hidden');
+        renderProfileDetails(resident);
+      });
+
+      // Quick Request Button
+      document.getElementById('btnOpenNewRequestModal').addEventListener('click', () => {
+        openResidentApplyModal(resident);
+      });
+    }
+
+    function renderResidentRequests(resident) {
+      const container = document.getElementById('requestsListContainer');
+      const allReqs = BDRMS.data().requests;
+
+      // Filter requests belonging to this resident (by residentId or matching name/birthdate)
+      const myReqs = allReqs.filter(r =>
+        (r.residentId && r.residentId === resident.id) ||
+        (r.applicant.firstName.toLowerCase() === resident.firstName.toLowerCase() &&
+         r.applicant.lastName.toLowerCase() === resident.lastName.toLowerCase())
+      );
+
+      // Counts
+      document.getElementById('dashTotalCount').innerText = myReqs.length;
+      document.getElementById('dashPendingCount').innerText = myReqs.filter(r => r.status === 'Submitted' || r.status === 'Under Verification' || r.status === 'For Approval').length;
+      document.getElementById('dashReadyCount').innerText = myReqs.filter(r => r.status === 'Ready for Pickup').length;
+      document.getElementById('dashReleasedCount').innerText = myReqs.filter(r => r.status === 'Released').length;
+
+      if (myReqs.length === 0) {
+        container.innerHTML = `
+          <div class="glass card empty-state">
+            ${BDRMS.ICONS.file}
+            <h4>No Document Requests Yet</h4>
+            <p>You haven't requested any documents under your account yet.</p>
+            <button class="btn btn-primary" style="margin-top: 16px;" onclick="document.getElementById('btnOpenNewRequestModal').click()">
+              Apply for Your First Document
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = myReqs.map(req => {
+        const doc = BDRMS.DOC_TYPES[req.docType];
+        const isReadyOrReleased = req.status === 'Ready for Pickup' || req.status === 'Released';
+
+        return `
+          <div class="req-list-card">
+            <div style="display:flex; align-items:center; gap: 16px;">
+              ${BDRMS.docIcon(req.docType, 'sm')}
+              <div>
+                <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 4px;">
+                  <b class="mono" style="color:var(--primary); font-size:0.92rem;">${req.ref}</b>
+                  ${BDRMS.statusBadge(req.status)}
+                </div>
+                <strong style="font-size: 1.05rem; display:block;">${BDRMS.esc(doc.name)}</strong>
+                <span style="font-size: 0.82rem; color:var(--muted);">Purpose: ${BDRMS.esc(req.purpose)} • Applied: ${BDRMS.fmtDate(req.createdAt)}</span>
+              </div>
+            </div>
+
+            <div style="display:flex; align-items:center; gap: 10px;">
+              ${isReadyOrReleased ? `
+                <button class="btn btn-primary btn-sm" onclick="showResidentCertificate('${req.id}')">
+                  ${BDRMS.ICONS.printer} View & Print Certificate
+                </button>
+              ` : `
+                <button class="btn btn-ghost btn-sm" onclick="showResidentTimeline('${req.id}')">
+                  ${BDRMS.ICONS.clock} View Progress
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderProfileDetails(resident) {
+      const container = document.getElementById('profileDetailsList');
+      container.innerHTML = `
+        <div class="kv-row"><dt>Full Name</dt><dd><b>${BDRMS.esc(BDRMS.fullName(resident))}</b></dd></div>
+        <div class="kv-row"><dt>Date of Birth</dt><dd>${BDRMS.fmtDateLong(resident.birthdate)} (${BDRMS.ageOf(resident.birthdate)} years old)</dd></div>
+        <div class="kv-row"><dt>Sex / Civil Status</dt><dd>${resident.sex} • ${resident.civilStatus}</dd></div>
+        <div class="kv-row"><dt>Barangay Address</dt><dd>${BDRMS.esc(resident.address)}</dd></div>
+        <div class="kv-row"><dt>Residency Established</dt><dd>${BDRMS.fmtDateLong(resident.residentSince)} (${BDRMS.residencyText(resident.residentSince)})</dd></div>
+        <div class="kv-row"><dt>Contact Mobile</dt><dd>${BDRMS.esc(resident.contact)}</dd></div>
+        <div class="kv-row"><dt>Portal Username</dt><dd><b class="mono">${BDRMS.esc(resident.username)}</b></dd></div>
+      `;
+    }
+
+    function openResidentApplyModal(resident) {
+      BDRMS.modal({
+        title: 'Apply for a Barangay Document',
+        subtitle: `Applicant: ${BDRMS.fullName(resident)} (${resident.purok})`,
+        wide: true,
+        body: `
+          <form id="formQuickApply" class="form-grid">
+            <div class="field span-2">
+              <label>Select Document Type <span class="req">*</span></label>
+              <select id="qaDocType" class="select">
+                ${Object.entries(BDRMS.DOC_TYPES).map(([k, d]) => `<option value="${k}">${d.name} (${d.fee})</option>`).join('')}
+              </select>
+            </div>
+
+            <div class="field span-2">
+              <label>Stated Purpose <span class="req">*</span></label>
+              <input type="text" id="qaPurpose" class="input" placeholder="e.g. Employment / Medical Assistance" required>
+            </div>
+
+            <div class="field">
+              <label>Valid ID Type <span class="req">*</span></label>
+              <select id="qaIdType" class="select">
+                ${BDRMS.ID_TYPES.map(t => `<option value="${t}">${t}</option>`).join('')}
+              </select>
+            </div>
+
+            <div class="field">
+              <label>ID Number <span class="req">*</span></label>
+              <input type="text" id="qaIdNumber" class="input" placeholder="e.g. 1234-5678-9012" required>
+            </div>
+
+            <div class="field span-2">
+              <div class="residency-meter ok" style="margin-top:0;">
+                ${BDRMS.ICONS.check} <b>Pre-verified Resident:</b> Your 6-month residency status in Barangay Wawa is already verified on file.
+              </div>
+            </div>
+          </form>
+        `,
+        foot: `
+          <button class="btn btn-ghost" data-close>Cancel</button>
+          <button class="btn btn-primary" id="btnSubmitQuickApply">${BDRMS.ICONS.send} Submit Application</button>
+        `,
+        onMount: (modalEl, closeFn) => {
+          modalEl.querySelector('#btnSubmitQuickApply').addEventListener('click', () => {
+            const docType = modalEl.querySelector('#qaDocType').value;
+            const purpose = modalEl.querySelector('#qaPurpose').value.trim();
+            const idType = modalEl.querySelector('#qaIdType').value;
+            const idNumber = modalEl.querySelector('#qaIdNumber').value.trim();
+
+            if (!purpose || !idNumber) {
+              BDRMS.toast('Please provide your purpose and ID number.', 'error');
+              return;
+            }
+
+            const applicant = {
+              firstName: resident.firstName,
+              middleName: resident.middleName,
+              lastName: resident.lastName,
+              suffix: resident.suffix,
+              birthdate: resident.birthdate,
+              sex: resident.sex,
+              civilStatus: resident.civilStatus,
+              purok: resident.purok,
+              contact: resident.contact,
+              email: resident.email,
+              residentSince: resident.residentSince,
+            };
+
+            const req = BDRMS.createRequest({
+              applicant,
+              docType,
+              purpose,
+              extra: {},
+              idType,
+              idNumber,
+              channel: 'Online',
+              by: `${resident.firstName} (Resident Portal)`,
+              residentId: resident.id,
+            });
+
+            BDRMS.toast(`Request ${req.ref} submitted successfully!`);
+            closeFn();
+            renderResidentRequests(resident);
+          });
+        },
+      });
+    }
+
+    window.showResidentCertificate = function(reqId) {
+      const req = BDRMS.data().requests.find(r => r.id === reqId);
+      if (!req) return;
+
+      BDRMS.modal({
+        title: 'Official Document Preview',
+        subtitle: `${BDRMS.DOC_TYPES[req.docType].name} — Barangay Wawa, Abra de Ilog`,
+        wide: true,
+        body: BDRMS.certificateHTML(req),
+        foot: `
+          <button class="btn btn-ghost" data-close>Close</button>
+          <button class="btn btn-primary" onclick="window.print()">${BDRMS.ICONS.printer} Print Document</button>
+        `,
+      });
+    };
+
+    window.showResidentTimeline = function(reqId) {
+      const req = BDRMS.data().requests.find(r => r.id === reqId);
+      if (!req) return;
+
+      BDRMS.modal({
+        title: `Tracking Progress: ${req.ref}`,
+        subtitle: BDRMS.DOC_TYPES[req.docType].name,
+        wide: false,
+        body: `
+          <div style="margin-bottom: 16px;">
+            ${BDRMS.statusBadge(req.status)}
+            <p style="font-size:0.84rem; color:var(--muted); margin-top:6px;">${BDRMS.STATUSES[req.status]?.desc || ''}</p>
+          </div>
+          <div class="timeline">
+            ${req.history.map(h => `
+              <div class="tl-item done" style="padding-bottom:14px;">
+                <div class="tl-dot" style="width:30px; height:30px;">${BDRMS.ICONS.check}</div>
+                <div class="tl-body">
+                  <strong style="font-size:0.86rem;">${h.status}</strong>
+                  <span style="font-size:0.75rem;">${BDRMS.fmtDateTime(h.at)} • ${h.by}</span>
+                  ${h.note ? `<p style="font-size:0.78rem;">${BDRMS.esc(h.note)}</p>` : ''}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `,
+        foot: `<button class="btn btn-primary" data-close>Close</button>`,
+      });
+    };
+  </script>
+</body>
+</html>

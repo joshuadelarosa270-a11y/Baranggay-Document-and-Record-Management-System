@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resident Portal Login & Registration — Barangay Wawa</title>
+  <meta name="description" content="Resident login and account registration for Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .auth-page {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 40px 20px;
+    }
+    .auth-card {
+      width: min(520px, 100%);
+      padding: 38px;
+    }
+    .tab-toggles {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 4px;
+      border-radius: 12px;
+      background: var(--surface-solid);
+      border: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .tab-toggle-btn {
+      padding: 10px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .tab-toggle-btn.active {
+      background: var(--grad-primary);
+      color: #031512;
+      box-shadow: var(--shadow-glow);
+    }
+    .demo-residents {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--border);
+    }
+    .demo-residents span {
+      display: block;
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .demo-res-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-size: 0.82rem;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .demo-res-btn:hover {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+    }
+  </style>
+</head>
+<body class="auth-page">
+
+  <div class="glass card auth-card">
+    <div style="text-align: center; margin-bottom: 22px;">
+      <div class="seal" style="margin: 0 auto 14px; width:52px; height:52px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h2 style="font-size: 1.6rem;">Barangay Resident Portal</h2>
+      <p class="muted" style="font-size: 0.86rem;">Barangay Wawa, Abra de Ilog, Occidental Mindoro</p>
+    </div>
+
+    <!-- Mode Switcher -->
+    <div class="tab-toggles">
+      <button type="button" class="tab-toggle-btn active" id="tabLoginBtn">Sign In</button>
+      <button type="button" class="tab-toggle-btn" id="tabRegisterBtn">Create Account</button>
+    </div>
+
+    <!-- Login Form -->
+    <div id="paneLogin">
+      <form id="residentLoginForm" style="display: grid; gap: 16px;">
+        <div class="field">
+          <label for="resIdentifier">Mobile Number or Username</label>
+          <input type="text" id="resIdentifier" class="input" placeholder="e.g. 09171234561 or maria.reyes" required autocomplete="username">
+        </div>
+
+        <div class="field">
+          <label for="resPassword">Password</label>
+          <input type="password" id="resPassword" class="input" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" id="btnResLoginSubmit" style="margin-top: 6px;">
+          Sign In to My Resident Account
+        </button>
+      </form>
+
+      <div class="demo-residents">
+        <span>Quick Demo Login (Pre-registered Residents):</span>
+        <button type="button" class="demo-res-btn" data-id="09171234561" data-pass="resident123">
+          <span><b>Maria Santos Reyes</b> (Purok 1)</span>
+          <span style="color:var(--primary); font-size:0.75rem;">Login as Maria →</span>
+        </button>
+        <button type="button" class="demo-res-btn" data-id="09181234562" data-pass="resident123">
+          <span><b>Jose Garcia Mendoza Jr.</b> (Purok 2)</span>
+          <span style="color:var(--primary); font-size:0.75rem;">Login as Jose →</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <div id="paneRegister" class="hidden">
+      <form id="residentRegisterForm" class="form-grid" style="row-gap: 14px;">
+        <div class="field">
+          <label for="regFirst">First Name <span class="req">*</span></label>
+          <input type="text" id="regFirst" class="input" placeholder="e.g. Elena" required>
+        </div>
+        <div class="field">
+          <label for="regLast">Last Name <span class="req">*</span></label>
+          <input type="text" id="regLast" class="input" placeholder="e.g. Delos Santos" required>
+        </div>
+
+        <div class="field">
+          <label for="regMiddle">Middle Name</label>
+          <input type="text" id="regMiddle" class="input" placeholder="e.g. Cruz">
+        </div>
+        <div class="field">
+          <label for="regBirth">Birthdate <span class="req">*</span></label>
+          <input type="date" id="regBirth" class="input" required>
+        </div>
+
+        <div class="field">
+          <label for="regPurok">Purok in Brgy. Wawa <span class="req">*</span></label>
+          <select id="regPurok" class="select" required>
+            <!-- Populated by JS -->
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="regSince">Living in Wawa Since <span class="req">*</span></label>
+          <input type="date" id="regSince" class="input" required>
+        </div>
+
+        <div class="field span-2">
+          <div id="regResidencyMeter" class="residency-meter ok" style="margin-top:0;"></div>
+        </div>
+
+        <div class="field">
+          <label for="regContact">Mobile Number <span class="req">*</span></label>
+          <input type="tel" id="regContact" class="input" placeholder="09XX XXX XXXX" required>
+        </div>
+
+        <div class="field">
+          <label for="regUsername">Choose Username <span class="req">*</span></label>
+          <input type="text" id="regUsername" class="input" placeholder="e.g. elena.santos" required>
+        </div>
+
+        <div class="field span-2">
+          <label for="regPassword">Create Password <span class="req">*</span></label>
+          <input type="password" id="regPassword" class="input" placeholder="At least 6 characters" required>
+        </div>
+
+        <div class="span-2" style="margin-top: 6px;">
+          <button type="submit" class="btn btn-primary btn-block btn-lg">
+            Create Account & Access Dashboard
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.82rem;">
+      <a href="index.html" class="muted" style="text-decoration: underline;">← Public Website</a>
+      <a href="admin-login.html" style="color: var(--accent); font-weight: 500;">Staff / Admin Portal →</a>
+    </div>
+  </div>
+
+  <script src="js/store.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // If already logged in, redirect to resident-dashboard.html
+      const cur = BDRMS.currentResident();
+      if (cur) {
+        window.location.href = 'resident-dashboard.html';
+      }
+
+      // Populate Purok
+      const purokSel = document.getElementById('regPurok');
+      purokSel.innerHTML = BDRMS.PUROKS.map(p => `<option value="${p}">${p}</option>`).join('');
+
+      // Setup default resident since (1 year ago)
+      const sinceInp = document.getElementById('regSince');
+      const def = new Date();
+      def.setFullYear(def.getFullYear() - 1);
+      sinceInp.value = def.toISOString().slice(0, 10);
+
+      const meter = document.getElementById('regResidencyMeter');
+      function checkResidency() {
+        const val = sinceInp.value;
+        const months = BDRMS.monthsBetween(val);
+        const text = BDRMS.residencyText(val);
+        if (months >= 6) {
+          meter.className = 'residency-meter ok';
+          meter.innerHTML = `${BDRMS.ICONS.check} <b>Residency: ${text}</b> — Eligible for all barangay certifications.`;
+        } else {
+          meter.className = 'residency-meter warn';
+          meter.innerHTML = `${BDRMS.ICONS.alert} <b>Residency: ${text}</b> — Note: Residency is under 6 months.`;
+        }
+      }
+      sinceInp.addEventListener('change', checkResidency);
+      checkResidency();
+
+      // Tab Toggles
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+      const paneLogin = document.getElementById('paneLogin');
+      const paneRegister = document.getElementById('paneRegister');
+
+      tabLoginBtn.addEventListener('click', () => {
+        tabLoginBtn.classList.add('active');
+        tabRegisterBtn.classList.remove('active');
+        paneLogin.classList.remove('hidden');
+        paneRegister.classList.add('hidden');
+      });
+
+      tabRegisterBtn.addEventListener('click', () => {
+        tabRegisterBtn.classList.add('active');
+        tabLoginBtn.classList.remove('active');
+        paneRegister.classList.remove('hidden');
+        paneLogin.classList.add('hidden');
+      });
+
+      // Quick autofill buttons
+      document.querySelectorAll('.demo-res-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('resIdentifier').value = btn.getAttribute('data-id');
+          document.getElementById('resPassword').value = btn.getAttribute('data-pass');
+          document.getElementById('btnResLoginSubmit').focus();
+        });
+      });
+
+      // Handle Login Form
+      document.getElementById('residentLoginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const id = document.getElementById('resIdentifier').value.trim();
+        const pass = document.getElementById('resPassword').value;
+
+        const res = BDRMS.loginResident(id, pass);
+        if (res.success) {
+          BDRMS.toast(`Welcome, ${res.resident.firstName}! Redirecting...`, 'success');
+          setTimeout(() => {
+            window.location.href = 'resident-dashboard.html';
+          }, 600);
+        } else {
+          BDRMS.toast(res.message, 'error');
+        }
+      });
+
+      // Handle Registration Form
+      document.getElementById('residentRegisterForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const regData = {
+          firstName: document.getElementById('regFirst').value,
+          lastName: document.getElementById('regLast').value,
+          middleName: document.getElementById('regMiddle').value,
+          birthdate: document.getElementById('regBirth').value,
+          purok: document.getElementById('regPurok').value,
+          residentSince: document.getElementById('regSince').value,
+          contact: document.getElementById('regContact').value,
+          username: document.getElementById('regUsername').value,
+          password: document.getElementById('regPassword').value,
+          sex: 'Female',
+          civilStatus: 'Single',
+        };
+
+        const newResident = BDRMS.registerResident(regData);
+        BDRMS.loginResident(newResident.username, regData.password);
+        BDRMS.toast(`Account created! Welcome, ${newResident.firstName}!`, 'success');
+        setTimeout(() => {
+          window.location.href = 'resident-dashboard.html';
+        }, 600);
+      });
+    });
+  </script>
+</body>
+</html>
