@@ -1,0 +1,20 @@
+{
+  "name": "barangay-document-and-record-management-system",
+  "version": "1.0.0",
+  "description": "Barangay Document and Records Management System (BDRMS) — Barangay Wawa, Abra de Ilog, Occidental Mindoro",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "barangay",
+    "document-management",
+    "e-services",
+    "records-management",
+    "lgu",
+    "philippines"
+  ],
+  "author": "Group 1E: Joshua Dela Rosa, Angela Espinosa, Nicole Guevarra, Era May Roxas",
+  "license": "MIT"
+}

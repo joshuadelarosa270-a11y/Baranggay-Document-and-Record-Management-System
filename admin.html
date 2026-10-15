@@ -13,7 +13,7 @@
 
   <div class="admin-app">
     <!-- Sidebar -->
-    <aside class="admin-sidebar">
+    <aside class="admin-sidebar" id="adminSidebar">
       <div class="sidebar-header">
         <div class="seal" style="width:36px; height:36px;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;">
@@ -76,7 +76,7 @@
       <!-- Topbar -->
       <header class="admin-topbar">
         <div style="display:flex; align-items:center; gap:14px;">
-          <button class="icon-btn menu-toggle" id="adminMenuToggle" aria-label="Toggle menu" style="display:none;"></button>
+          <button class="icon-btn menu-toggle" id="adminMenuToggle" type="button" aria-label="Hide sidebar" aria-controls="adminSidebar" aria-expanded="true" title="Hide sidebar"></button>
           <div class="topbar-title">
             <h2>Document Processing & Records</h2>
             <p>Barangay Wawa, Abra de Ilog, Occidental Mindoro</p>
@@ -86,10 +86,16 @@
         <div class="topbar-actions">
           <!-- Role Switcher for Interactive Demo / Evaluation -->
           <div class="role-switcher">
-            <span>Demo Role:</span>
-            <button class="role-btn active" data-role="admin">Admin</button>
-            <button class="role-btn" data-role="secretary" title="Sec. Lorna P. Fernandez">Secretary</button>
-            <button class="role-btn" data-role="captain" title="Hon. Ricardo D. Malabanan">Captain</button>
+            <span style="font-weight:600; color:var(--text-soft);">Tungkulin:</span>
+            <button class="role-btn active" data-role="admin" title="System Administrator — Pagsubaybay at Pag-monitor Lamang">
+              🛡️ Admin (Monitor)
+            </button>
+            <button class="role-btn" data-role="secretary" title="Sec. Lorna P. Fernandez — Pag-apruba ng Requests at Pagrehistro ng Residente">
+              ✍️ Secretary (Aprubador)
+            </button>
+            <button class="role-btn" data-role="resident" title="Pumunta sa Resident Portal">
+              👤 Residente
+            </button>
           </div>
 
           <button class="btn btn-ghost btn-sm" id="btnExportCSV" title="Export monthly report for DILG / LGU Abra de Ilog">
@@ -115,6 +121,8 @@
 
       <!-- Content Container -->
       <div class="admin-content">
+        <!-- Dynamic Role Status & Responsibilities Banner -->
+        <div id="adminRoleBannerContainer"></div>
         <!-- Tab 1: Requests & Applications -->
         <div class="tab-pane active" id="tabRequests">
           <!-- Stats Summary Cards -->
@@ -129,7 +137,7 @@
               </div>
             </div>
 
-            <div class="stat-card" data-filter-status="pending_verify">
+            <div class="stat-card" data-filter-status="Under Verification">
               <div class="stat-icon" style="background:var(--gold-soft); color:var(--gold);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
               </div>
@@ -172,7 +180,7 @@
 
           <!-- Table Container -->
           <div class="table-panel">
-            <div class="table-toolbar">
+            <div class="table-toolbar table-toolbar--requests">
               <div class="search-box">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" id="tableSearch" class="input" placeholder="Search reference, applicant, or purok...">
@@ -209,7 +217,7 @@
             </div>
 
             <div class="data-table-wrap">
-              <table class="data-table">
+              <table class="data-table requests-table">
                 <thead>
                   <tr>
                     <th>Reference</th>
@@ -234,25 +242,39 @@
           <div class="table-panel">
             <div class="table-toolbar">
               <div>
-                <h3 style="font-size: 1.15rem;">Barangay Wawa Registry</h3>
-                <p class="muted" style="font-size: 0.82rem;">Official list of residents with recorded length of residency in the barangay.</p>
+                <h3 style="font-size: 1.15rem;" id="residentsViewTitle">Talaan ng mga Residente — Barangay Wawa</h3>
+                <p class="muted" style="font-size: 0.82rem;" id="residentsViewSubtitle">Opisyal na rehistro ng mga mamamayan na naninirahan sa Barangay Wawa, Abra de Ilog.</p>
               </div>
-              <button class="btn btn-primary btn-sm" id="btnAddResident">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M12 5v14M5 12h14"/></svg>
-                Register Resident
-              </button>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <button class="btn btn-primary btn-sm" id="btnAddResident">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M12 5v14M5 12h14"/></svg>
+                  Magrehistro ng Residente
+                </button>
+              </div>
+            </div>
+
+            <!-- Sub-tabs for Active vs Pending Approvals -->
+            <div style="padding: 0 20px 10px;">
+              <div class="sub-tabs-bar">
+                <button class="btn-subtab active" id="subtabActiveResidents" data-subtab="active">
+                  🏛️ Rehistradong Residente (<span id="countActiveResidents">0</span>)
+                </button>
+                <button class="btn-subtab" id="subtabPendingResidents" data-subtab="pending">
+                  ⏳ Hinihintay na Pag-apruba ni Secretary (<span id="countPendingResidents">0</span>)
+                </button>
+              </div>
             </div>
 
             <div class="data-table-wrap">
               <table class="data-table">
-                <thead>
+                <thead id="residentsTableHead">
                   <tr>
                     <th>Resident ID</th>
-                    <th>Full Name</th>
-                    <th>Purok</th>
-                    <th>Contact</th>
-                    <th>Residency Duration</th>
-                    <th>Registry Status</th>
+                    <th>Buong Pangalan</th>
+                    <th>Purok sa Wawa</th>
+                    <th>Numero ng Telepono</th>
+                    <th>Tagal ng Paninirahan</th>
+                    <th>Katayuan</th>
                   </tr>
                 </thead>
                 <tbody id="residentsTableBody">
@@ -297,7 +319,7 @@
             <div class="glass card">
               <h3 style="font-size: 1.25rem; margin-bottom: 14px;">Barangay Wawa Officials</h3>
               <div class="kv-list">
-                <div class="kv-row"><dt>Punong Barangay</dt><dd><b>Hon. Ricardo D. Malabanan</b></dd></div>
+                <div class="kv-row"><dt>Authorized Staff</dt><dd><b>System Administrator & Barangay Secretary</b></dd></div>
                 <div class="kv-row"><dt>Barangay Secretary</dt><dd><b>Lorna P. Fernandez</b></dd></div>
                 <div class="kv-row"><dt>Municipality</dt><dd>Abra de Ilog</dd></div>
                 <div class="kv-row"><dt>Province</dt><dd>Occidental Mindoro</dd></div>

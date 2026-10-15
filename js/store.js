@@ -4,7 +4,7 @@
    ========================================================================== */
 
 const BDRMS = (() => {
-  const STORAGE_KEY = 'bdrms_data_v1';
+  const STORAGE_KEY = 'bdrms_data_v2';
   const SESSION_STAFF_KEY = 'bdrms_staff_session';
   const SESSION_RESIDENT_KEY = 'bdrms_resident_session';
   const DEVICE_KEY = 'bdrms_device_refs';
@@ -126,8 +126,8 @@ const BDRMS = (() => {
   /* ---------- Workflow ---------- */
   const STATUSES = {
     'Submitted': { cls: 'badge-submitted', icon: 'send', desc: 'Request received by the barangay.' },
-    'Under Verification': { cls: 'badge-verification', icon: 'search', desc: 'Identity and residency are being checked by the barangay secretary.' },
-    'For Approval': { cls: 'badge-approval', icon: 'signature', desc: 'Waiting for review and signature of the Punong Barangay.' },
+    'Under Verification': { cls: 'badge-verification', icon: 'search', desc: 'Identity and residency are being checked by the barangay staff.' },
+    'For Approval': { cls: 'badge-approval', icon: 'signature', desc: 'Waiting for final review and approval by authorized staff.' },
     'Ready for Pickup': { cls: 'badge-ready', icon: 'package', desc: 'Approved. Bring your valid ID to claim the document at the barangay hall.' },
     'Released': { cls: 'badge-released', icon: 'badgeCheck', desc: 'Document released to the resident.' },
     'Rejected': { cls: 'badge-rejected', icon: 'x', desc: 'Request could not be processed. See remarks.' },
@@ -135,9 +135,22 @@ const BDRMS = (() => {
   const FLOW = ['Submitted', 'Under Verification', 'For Approval', 'Ready for Pickup', 'Released'];
 
   const ROLES = {
-    admin: { label: 'System Administrator', can: ['verify', 'forward', 'approve', 'release', 'reject', 'residents', 'walkin', 'logs', 'settings', 'reveal', 'export'] },
-    secretary: { label: 'Barangay Secretary', can: ['verify', 'forward', 'release', 'reject', 'residents', 'walkin', 'logs', 'reveal', 'export'] },
-    captain: { label: 'Punong Barangay', can: ['approve', 'reject', 'logs', 'reveal'] },
+    admin: {
+      label: 'System Administrator',
+      short: 'Admin',
+      role: 'admin',
+      title: 'Tagasubaybay (Executive Monitor)',
+      desc: 'Tungkulin: Pagsubaybay at pag-monitor sa mga transaksyon, opisyal na talaan, at audit trail ng barangay.',
+      can: ['monitor', 'view', 'logs', 'settings', 'export']
+    },
+    secretary: {
+      label: 'Barangay Secretary',
+      short: 'Sec. L. Fernandez',
+      role: 'secretary',
+      title: 'Kalihim ng Barangay (Operations & Approval)',
+      desc: 'Tungkulin: Pag-apruba ng lahat ng kahilingan sa dokumento at pagrerehistro ng mga residente sa Barangay Wawa.',
+      can: ['monitor', 'view', 'verify', 'forward', 'approve', 'release', 'reject', 'residents', 'register_resident', 'approve_resident', 'walkin', 'logs', 'settings', 'reveal', 'export']
+    },
   };
 
   const ID_TYPES = ['PhilSys National ID', "Voter's ID / Certification", "Driver's License", 'Passport', 'UMID / SSS ID', 'PhilHealth ID', 'Postal ID', 'Senior Citizen ID', 'PWD ID', 'School ID', 'Existing Barangay ID', 'Other'];
@@ -239,13 +252,66 @@ const BDRMS = (() => {
       firstName, middleName, lastName, suffix, birthdate, sex, civilStatus, purok,
       address: `${purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
       contact, email: `${username || 'resident'}@example.com`, residentSince: monthsAgo(months),
-      verified: true, createdAt: daysAgo(90 + i),
+      verified: true,
+      status: 'active',
+      registeredBy: 'Sec. L. Fernandez',
+      registrationChannel: 'Official Secretary Registration',
+      createdAt: daysAgo(90 + i),
     }));
+
+    // Seed 2 sample residents pending Secretary approval to demonstrate the approval workflow
+    residents.push({
+      id: 'res_pending_1',
+      username: 'rica.alcantara',
+      password: 'resident123',
+      firstName: 'Rica Mae',
+      middleName: 'Santos',
+      lastName: 'Alcantara',
+      suffix: '',
+      birthdate: '1998-05-12',
+      sex: 'Female',
+      civilStatus: 'Single',
+      purok: 'Purok 4',
+      address: 'Purok 4, Barangay Wawa, Abra de Ilog, Occidental Mindoro',
+      contact: '09179998811',
+      email: 'rica.alcantara@example.com',
+      residentSince: monthsAgo(14),
+      verified: false,
+      status: 'pending_approval',
+      registeredBy: null,
+      registrationChannel: 'Online Pre-Registration',
+      notes: 'Online pre-registration with proof of residency in Purok 4.',
+      createdAt: daysAgo(1, 14),
+    });
+
+    residents.push({
+      id: 'res_pending_2',
+      username: 'danilo.mercado',
+      password: 'resident123',
+      firstName: 'Danilo',
+      middleName: 'Ramos',
+      lastName: 'Mercado',
+      suffix: '',
+      birthdate: '1982-09-20',
+      sex: 'Male',
+      civilStatus: 'Married',
+      purok: 'Purok 2',
+      address: 'Purok 2, Barangay Wawa, Abra de Ilog, Occidental Mindoro',
+      contact: '09188887722',
+      email: 'danilo.mercado@example.com',
+      residentSince: monthsAgo(36),
+      verified: false,
+      status: 'pending_approval',
+      registeredBy: null,
+      registrationChannel: 'Online Pre-Registration',
+      notes: 'Online pre-registration with voter certificate.',
+      createdAt: daysAgo(2, 9),
+    });
 
     const mk = (n, resIdx, docType, purpose, channel, statusIdx, created, opts = {}) => {
       const r = residents[resIdx];
       const history = [];
-      const actors = ['System', 'Sec. L. Fernandez', 'Sec. L. Fernandez', 'Hon. R. Malabanan', 'Sec. L. Fernandez'];
+      const actors = ['System', 'Sec. L. Fernandez', 'Sec. L. Fernandez', 'Admin', 'Sec. L. Fernandez'];
       const steps = opts.rejected ? FLOW.slice(0, statusIdx + 1) : FLOW.slice(0, statusIdx + 1);
       steps.forEach((s, i) => history.push({ status: s, by: channel === 'Walk-in' && i === 0 ? 'Sec. L. Fernandez' : actors[i], at: new Date(new Date(created).getTime() + i * 3600e3 * (3 + i)).toISOString(), note: i === 0 ? (channel === 'Online' ? 'Submitted through the online portal.' : 'Encoded at the barangay hall (walk-in).') : '' }));
       if (opts.rejected) history.push({ status: 'Rejected', by: 'Sec. L. Fernandez', at: new Date(new Date(created).getTime() + 8 * 3600e3).toISOString(), note: opts.rejected });
@@ -285,20 +351,19 @@ const BDRMS = (() => {
     ];
 
     const logs = [
-      { id: uid('log'), at: daysAgo(0, 8), user: 'System', role: 'system', action: 'Demo data initialized', target: '' },
+      { id: uid('log'), at: daysAgo(0, 8), user: 'System', role: 'system', action: 'Demo database v2 initialized with Barangay Wawa registry', target: '' },
     ];
 
     return {
-      version: 1,
+      version: 2,
       settings: {
         barangay: 'Barangay Wawa', municipality: 'Abra de Ilog', province: 'Occidental Mindoro',
-        captain: 'Hon. Ricardo D. Malabanan', secretary: 'Lorna P. Fernandez',
+        secretary: 'Lorna P. Fernandez',
         hours: 'Monday – Friday, 8:00 AM – 5:00 PM',
       },
       users: [
         { username: 'admin', password: 'admin123', role: 'admin', name: 'System Administrator', short: 'Admin' },
         { username: 'secretary', password: 'secretary123', role: 'secretary', name: 'Lorna P. Fernandez', short: 'Sec. L. Fernandez' },
-        { username: 'captain', password: 'captain123', role: 'captain', name: 'Hon. Ricardo D. Malabanan', short: 'Hon. R. Malabanan' },
       ],
       residents, requests, logs,
     };
@@ -308,7 +373,7 @@ const BDRMS = (() => {
   let db = null;
   function load() {
     try { db = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { db = null; }
-    if (!db || db.version !== 1) { db = seed(); save(); }
+    if (!db || db.version !== 2) { db = seed(); save(); }
     return db;
   }
   function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
@@ -403,10 +468,35 @@ const BDRMS = (() => {
       (x.contact && x.contact.replace(/\D/g, '') === phoneClean) ||
       (x.email && x.email.toLowerCase() === idClean)
     );
-    if (!r) return { success: false, message: 'Resident account not found in Barangay Wawa records.' };
-    if (r.password !== password && password !== 'resident123') {
-      return { success: false, message: 'Invalid password. Please check your credentials.' };
+    if (!r) {
+      return {
+        success: false,
+        notFound: true,
+        message: 'Hindi nakita ang resident account sa opisyal na rehistro ng Barangay Wawa. Magsumite ng pre-registration o lumapit kay Secretary Lorna Fernandez upang mairehistro.'
+      };
     }
+
+    // Strict validation: resident MUST be verified / approved by Secretary
+    if (!r.verified || r.status === 'pending_approval') {
+      return {
+        success: false,
+        pending: true,
+        message: 'Hindi pa aprubado: Ang iyong account ay kasalukuyan pang sinusuri ni Barangay Secretary Lorna Fernandez. Hintayin ang pag-apruba ng Kalihim o magsadya sa Barangay Hall bago mag-login.'
+      };
+    }
+
+    if (r.status === 'rejected') {
+      return {
+        success: false,
+        rejected: true,
+        message: `Hindi naaprubahan ang rehistrasyon: ${r.remarks || 'Hindi natukoy na naninirahan sa Barangay Wawa'}. Makipag-ugnayan sa Tanggapan ng Kalihim.`
+      };
+    }
+
+    if (r.password !== password && password !== 'resident123') {
+      return { success: false, message: 'Maling password. Pakisuri muli ang iyong password.' };
+    }
+
     sessionStorage.setItem(SESSION_RESIDENT_KEY, JSON.stringify({ residentId: r.id, last: Date.now() }));
     log({ short: fullName(r), role: 'resident' }, `Resident logged into portal`, r.id);
     return { success: true, resident: r };
@@ -426,11 +516,51 @@ const BDRMS = (() => {
     sessionStorage.removeItem(SESSION_RESIDENT_KEY);
   }
 
-  function registerResident(regData) {
+  // Resident submits pre-registration online (Requires Secretary approval to activate login)
+  function registerResidentOnline(regData) {
+    if (!PUROKS.includes(regData.purok)) {
+      throw new Error('Dapat ay naninirahan sa Barangay Wawa (Purok 1 hanggang Purok 7).');
+    }
     const id = uid('res');
     const newRes = {
       id,
-      username: regData.username || `res_${Date.now().toString(36)}`,
+      username: regData.username ? regData.username.trim().toLowerCase() : `res_${Date.now().toString(36)}`,
+      password: regData.password || 'resident123',
+      firstName: regData.firstName.trim(),
+      middleName: (regData.middleName || '').trim(),
+      lastName: regData.lastName.trim(),
+      suffix: (regData.suffix || '').trim(),
+      birthdate: regData.birthdate,
+      sex: regData.sex || 'Male',
+      civilStatus: regData.civilStatus || 'Single',
+      purok: regData.purok,
+      address: `${regData.purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
+      contact: regData.contact.trim(),
+      email: (regData.email || '').trim(),
+      residentSince: regData.residentSince,
+      verified: false,
+      status: 'pending_approval',
+      registeredBy: null,
+      registrationChannel: 'Online Pre-Registration',
+      notes: regData.notes || 'Nagsumite ng pre-registration online. Naghihintay ng beripikasyon at pag-apruba ng Kalihim.',
+      createdAt: new Date().toISOString(),
+    };
+    data().residents.unshift(newRes);
+    save();
+    log({ short: fullName(newRes), role: 'resident' }, 'New resident pre-registered online (Awaiting Secretary approval)', id);
+    return newRes;
+  }
+
+  // Secretary directly encodes and officially registers a resident (Instantly active login)
+  function registerResidentBySecretary(regData, secretaryUser) {
+    if (!PUROKS.includes(regData.purok)) {
+      throw new Error('Dapat ay naninirahan sa Barangay Wawa (Purok 1 hanggang Purok 7).');
+    }
+    const id = uid('res');
+    const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
+    const newRes = {
+      id,
+      username: regData.username ? regData.username.trim().toLowerCase() : `res_${Date.now().toString(36)}`,
       password: regData.password || 'resident123',
       firstName: regData.firstName.trim(),
       middleName: (regData.middleName || '').trim(),
@@ -445,13 +575,50 @@ const BDRMS = (() => {
       email: (regData.email || '').trim(),
       residentSince: regData.residentSince,
       verified: true,
+      status: 'active',
+      registeredBy: secName,
+      registrationChannel: 'Official Secretary Registration',
+      notes: 'Direktang ipinatala at inaprubahan sa Tanggapan ng Kalihim ng Barangay.',
       createdAt: new Date().toISOString(),
+      approvedAt: new Date().toISOString(),
     };
     data().residents.unshift(newRes);
     save();
-    log({ short: fullName(newRes), role: 'resident' }, 'New resident self-registered online', id);
+    log(secretaryUser || { short: secName, role: 'secretary' }, `Secretary officially registered resident ${fullName(newRes)} in Barangay Wawa Registry`, id);
     return newRes;
   }
+
+  // Secretary approves pending resident pre-registration (Unlocks resident login)
+  function approveResidentBySecretary(residentId, secretaryUser) {
+    const r = data().residents.find((x) => x.id === residentId);
+    if (!r) return null;
+    const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
+    r.verified = true;
+    r.status = 'active';
+    r.registeredBy = secName;
+    r.approvedAt = new Date().toISOString();
+    save();
+    log(secretaryUser || { short: secName, role: 'secretary' }, `Secretary approved resident registration for ${fullName(r)} (Login activated)`, r.id);
+    return r;
+  }
+
+  // Secretary rejects resident registration (e.g., non-resident)
+  function rejectResidentBySecretary(residentId, reason, secretaryUser) {
+    const r = data().residents.find((x) => x.id === residentId);
+    if (!r) return null;
+    const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
+    r.verified = false;
+    r.status = 'rejected';
+    r.remarks = reason || 'Hindi natukoy na lehitimong naninirahan sa Barangay Wawa.';
+    r.rejectedBy = secName;
+    r.rejectedAt = new Date().toISOString();
+    save();
+    log(secretaryUser || { short: secName, role: 'secretary' }, `Secretary rejected resident registration for ${fullName(r)}: ${r.remarks}`, r.id);
+    return r;
+  }
+
+  // Backward compatibility
+  const registerResident = registerResidentOnline;
 
   /* ---------- CSV Export Function for Barangay Secretary / DILG ---------- */
   function exportRequestsCSV() {
@@ -564,7 +731,7 @@ const BDRMS = (() => {
             <p>Province of ${esc(s.province)}</p>
             <p>Municipality of ${esc(s.municipality)}</p>
             <h4>${esc(s.barangay).toUpperCase()}</h4>
-            <p class="cert-office">OFFICE OF THE PUNONG BARANGAY</p>
+            <p class="cert-office">OFFICE OF THE BARANGAY SECRETARY</p>
           </div>
           <div class="cert-seal alt">${ICONS.shield}</div>
         </div>
@@ -575,7 +742,7 @@ const BDRMS = (() => {
         
         <div class="cert-sign">
           <div><div class="line"></div><b>${name}</b><span>Signature of Applicant</span></div>
-          <div><div class="line"></div><b>${esc(s.captain).toUpperCase()}</b><span>Punong Barangay</span></div>
+          <div><div class="line"></div><b>${esc(s.secretary).toUpperCase()}</b><span>Barangay Secretary</span></div>
         </div>
 
         <div class="cert-meta-bottom">
@@ -607,6 +774,7 @@ const BDRMS = (() => {
     deviceRefs, addDeviceRef,
     login, currentUser, logout, can,
     loginResident, currentResident, logoutResident, registerResident,
+    registerResidentOnline, registerResidentBySecretary, approveResidentBySecretary, rejectResidentBySecretary,
     exportRequestsCSV, generateQRCodeSVG,
     toast, modal, confirmDialog, statusBadge, docIcon, certificateHTML,
   };

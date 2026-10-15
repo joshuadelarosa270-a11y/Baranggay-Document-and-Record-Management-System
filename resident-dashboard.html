@@ -1,17 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resident Dashboard — Barangay Wawa</title>
-  <meta name="description" content="Personal document management dashboard for registered residents of Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
+  <title>Resident Dashboard — Barangay Wawa E-Services</title>
+  <meta name="description" content="Personal document management dashboard para sa mga rehistradong residente ng Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/print.css">
   <style>
     .res-dash-header {
-      background: linear-gradient(180deg, #091325, #060b17);
-      border-bottom: 1px solid var(--border);
-      padding: 24px 0;
+      background: linear-gradient(135deg, #091325 0%, #0f2744 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 30px 0;
+      color: #ffffff;
     }
     .profile-hero {
       display: flex;
@@ -23,57 +24,60 @@
     .res-profile {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
     }
     .res-avatar {
-      width: 56px;
-      height: 56px;
+      width: 60px;
+      height: 60px;
       border-radius: 16px;
       background: var(--grad-primary);
-      color: #031512;
-      font-size: 1.5rem;
-      font-weight: 700;
+      color: #ffffff;
+      font-size: 1.6rem;
+      font-weight: 800;
       font-family: var(--font-display);
       display: grid;
       place-items: center;
-      box-shadow: var(--shadow-glow);
+      box-shadow: 0 4px 16px rgba(5, 150, 105, 0.4);
+      border: 2px solid rgba(255, 255, 255, 0.2);
     }
     .res-stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
-      margin: 32px 0;
+      margin: 30px 0;
     }
     .req-list-card {
-      padding: 24px;
+      padding: 22px 24px;
       border-radius: var(--radius);
-      margin-bottom: 16px;
-      background: var(--surface);
+      margin-bottom: 14px;
+      background: #ffffff;
       border: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
       flex-wrap: wrap;
-      transition: border-color .2s, transform .2s;
+      box-shadow: var(--shadow-sm);
+      transition: border-color .2s, transform .2s, box-shadow .2s;
     }
     .req-list-card:hover {
-      border-color: var(--border-strong);
+      border-color: #a7f3d0;
       transform: translateY(-2px);
+      box-shadow: var(--shadow);
     }
     .dash-tabs {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .dash-tab-btn {
-      padding: 12px 18px;
+      padding: 12px 20px;
       font-weight: 600;
-      font-size: 0.92rem;
-      color: var(--muted);
+      font-size: 0.94rem;
+      color: var(--text-muted);
       cursor: pointer;
-      border-bottom: 2px solid transparent;
+      border-bottom: 2.5px solid transparent;
       margin-bottom: -1px;
       transition: all .2s;
     }
@@ -81,11 +85,34 @@
       color: var(--primary);
       border-color: var(--primary);
     }
+    .kv-list {
+      display: grid;
+      gap: 12px;
+    }
+    .kv-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .kv-row dt {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .kv-row dd {
+      color: var(--text);
+      font-weight: 600;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  <!-- Top Sticky Navigation -->
   <header class="nav scrolled">
     <div class="container nav-inner">
       <a href="index.html" class="brand">
@@ -96,40 +123,44 @@
         </div>
         <div class="brand-text">
           <strong>Barangay Wawa</strong>
-          <span>Resident Portal</span>
+          <span>Portal ng Residente</span>
         </div>
       </a>
 
       <div class="nav-cta">
         <a href="index.html" class="btn btn-ghost btn-sm">Public Website</a>
         <button class="btn btn-danger btn-sm" id="btnResidentLogout">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
-          Sign Out
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+          </svg>
+          Mag-logout
         </button>
       </div>
     </div>
   </header>
 
   <!-- Resident Header Banner -->
-  <div class="res-dash-header" style="margin-top: 76px;">
+  <div class="res-dash-header" style="margin-top: 74px;">
     <div class="container profile-hero">
       <div class="res-profile">
         <div class="res-avatar" id="dashAvatar">M</div>
         <div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <h2 id="dashName" style="font-size: 1.45rem;">Resident Name</h2>
-            <span class="badge badge-released">Verified Resident</span>
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <h2 id="dashName" style="font-size: 1.5rem; color:#ffffff;">Pangalan ng Residente</h2>
+            <span class="badge badge-ready no-dot">Rehistradong Residente</span>
           </div>
-          <p class="muted" style="font-size: 0.86rem; margin-top: 3px;">
-            <span id="dashPurok">Purok 1</span> • Length of Residency: <b id="dashResidencyDuration" style="color:var(--text);">10 Years</b>
+          <p style="font-size: 0.88rem; color:#cbd5e1; margin-top: 4px;">
+            <span id="dashPurok">Purok 1</span> • Tagal ng Paninirahan: <b id="dashResidencyDuration" style="color:#ffffff;">10 Taon</b>
           </p>
         </div>
       </div>
 
       <div>
         <button class="btn btn-primary" id="btnOpenNewRequestModal">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;"><path d="M12 5v14M5 12h14"/></svg>
-          Apply for New Document
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Mag-apply ng Bagong Dokumento
         </button>
       </div>
     </div>
@@ -139,41 +170,41 @@
   <main class="container" style="padding: 30px 0 60px;">
     <!-- Metric Cards -->
     <div class="res-stats-grid">
-      <div class="glass card" style="padding: 20px;">
-        <span class="muted" style="font-size: 0.8rem;">Total Requests Filed</span>
-        <strong id="dashTotalCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); margin-top: 4px;">0</strong>
+      <div class="card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Lahat ng Naipasa</span>
+        <strong id="dashTotalCount" style="font-size: 2rem; display: block; font-family: var(--font-display); margin-top: 4px; color:var(--text);">0</strong>
       </div>
-      <div class="glass card" style="padding: 20px;">
-        <span class="muted" style="font-size: 0.8rem;">Currently Processing</span>
-        <strong id="dashPendingCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); color: var(--gold); margin-top: 4px;">0</strong>
+      <div class="card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Kasalukuyang Sinusuri</span>
+        <strong id="dashPendingCount" style="font-size: 2rem; display: block; font-family: var(--font-display); color: var(--gold); margin-top: 4px;">0</strong>
       </div>
-      <div class="glass card" style="padding: 20px;">
-        <span class="muted" style="font-size: 0.8rem;">Ready for Pickup at Hall</span>
-        <strong id="dashReadyCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); color: var(--primary); margin-top: 4px;">0</strong>
+      <div class="card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Handa nang Kunin sa Hall</span>
+        <strong id="dashReadyCount" style="font-size: 2rem; display: block; font-family: var(--font-display); color: var(--primary); margin-top: 4px;">0</strong>
       </div>
-      <div class="glass card" style="padding: 20px;">
-        <span class="muted" style="font-size: 0.8rem;">Claimed & Released</span>
-        <strong id="dashReleasedCount" style="font-size: 1.8rem; display: block; font-family: var(--font-display); color: var(--success); margin-top: 4px;">0</strong>
+      <div class="card" style="padding: 20px;">
+        <span class="muted" style="font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Nakuha / Na-release Na</span>
+        <strong id="dashReleasedCount" style="font-size: 2rem; display: block; font-family: var(--font-display); color: var(--success); margin-top: 4px;">0</strong>
       </div>
     </div>
 
     <!-- Tab navigation -->
     <div class="dash-tabs">
-      <button class="dash-tab-btn active" id="tabMyRequests">My Document Requests</button>
-      <button class="dash-tab-btn" id="tabProfileDetails">Resident Profile & Credentials</button>
+      <button class="dash-tab-btn active" id="tabMyRequests">Aking mga Request (My Requests)</button>
+      <button class="dash-tab-btn" id="tabProfileDetails">Talaan ng Residente (Registry Profile)</button>
     </div>
 
-    <!-- Section 1: My Requests -->
+    <!-- Section 1: My Requests List -->
     <div id="paneMyRequests">
       <div id="requestsListContainer">
-        <!-- Dynamically rendered -->
+        <!-- Rendered dynamically -->
       </div>
     </div>
 
     <!-- Section 2: Profile Details -->
     <div id="paneProfile" class="hidden">
-      <div class="glass card" style="max-width: 680px;">
-        <h3 style="margin-bottom: 18px; font-size: 1.2rem;">Official Resident Registry Profile</h3>
+      <div class="card" style="max-width: 680px;">
+        <h3 style="margin-bottom: 18px; font-size: 1.25rem;">Opisyal na Talaan sa Barangay Registry</h3>
         <div class="kv-list" id="profileDetailsList">
           <!-- Populated by JS -->
         </div>
@@ -192,6 +223,15 @@
       }
 
       initResidentDashboard(resident);
+
+      // If redirected here after login/register with a pending doc to apply, auto-open modal
+      const params = new URLSearchParams(window.location.search);
+      const applyDocKey = params.get('apply');
+      if (applyDocKey && BDRMS.DOC_TYPES[applyDocKey]) {
+        setTimeout(() => {
+          openResidentApplyModal(resident, applyDocKey);
+        }, 600);
+      }
     });
 
     function initResidentDashboard(resident) {
@@ -206,7 +246,7 @@
       // Logout handler
       document.getElementById('btnResidentLogout').addEventListener('click', () => {
         BDRMS.logoutResident();
-        BDRMS.toast('Logged out of resident portal.');
+        BDRMS.toast('Naka-logout na sa portal ng residente.');
         setTimeout(() => window.location.href = 'resident-login.html', 400);
       });
 
@@ -241,7 +281,7 @@
       const container = document.getElementById('requestsListContainer');
       const allReqs = BDRMS.data().requests;
 
-      // Filter requests belonging to this resident (by residentId or matching name/birthdate)
+      // Filter requests belonging to this resident
       const myReqs = allReqs.filter(r =>
         (r.residentId && r.residentId === resident.id) ||
         (r.applicant.firstName.toLowerCase() === resident.firstName.toLowerCase() &&
@@ -256,12 +296,14 @@
 
       if (myReqs.length === 0) {
         container.innerHTML = `
-          <div class="glass card empty-state">
-            ${BDRMS.ICONS.file}
-            <h4>No Document Requests Yet</h4>
-            <p>You haven't requested any documents under your account yet.</p>
-            <button class="btn btn-primary" style="margin-top: 16px;" onclick="document.getElementById('btnOpenNewRequestModal').click()">
-              Apply for Your First Document
+          <div class="card" style="text-align:center; padding: 48px 20px;">
+            <div style="width:54px; height:54px; border-radius:50%; background:#f1f5f9; color:var(--text-muted); display:grid; place-items:center; margin: 0 auto 16px;">
+              ${BDRMS.ICONS.file}
+            </div>
+            <h4 style="font-size: 1.2rem; margin-bottom: 6px;">Wala pang Naipasang Request</h4>
+            <p class="muted">Wala ka pang naisasumiteng aplikasyon para sa mga sertipiko ng barangay.</p>
+            <button class="btn btn-primary" style="margin-top: 18px;" onclick="document.getElementById('btnOpenNewRequestModal').click()">
+              Mag-apply para sa Unang Dokumento
             </button>
           </div>
         `;
@@ -275,27 +317,32 @@
         return `
           <div class="req-list-card">
             <div style="display:flex; align-items:center; gap: 16px;">
-              ${BDRMS.docIcon(req.docType, 'sm')}
+              <div class="doc-icon" style="background:${doc.color.replace('hsl', 'hsla').replace(')', ', 0.12)')};color:${doc.color};border:1px solid ${doc.color.replace('hsl', 'hsla').replace(')', ', 0.25)')}; margin-bottom:0;">
+                ${BDRMS.ICONS[doc.icon]}
+              </div>
               <div>
-                <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 4px;">
-                  <b class="mono" style="color:var(--primary); font-size:0.92rem;">${req.ref}</b>
+                <div style="display:flex; align-items:center; gap: 8px; margin-bottom: 4px; flex-wrap:wrap;">
+                  <b class="mono" style="color:var(--primary); font-size:0.95rem;">${req.ref}</b>
                   ${BDRMS.statusBadge(req.status)}
+                  <span class="chip" style="font-size:0.74rem;">${req.channel}</span>
                 </div>
-                <strong style="font-size: 1.05rem; display:block;">${BDRMS.esc(doc.name)}</strong>
-                <span style="font-size: 0.82rem; color:var(--muted);">Purpose: ${BDRMS.esc(req.purpose)} • Applied: ${BDRMS.fmtDate(req.createdAt)}</span>
+                <strong style="font-size: 1.1rem; display:block; color:var(--text);">${BDRMS.esc(doc.name)}</strong>
+                <span style="font-size: 0.84rem; color:var(--text-muted);">Layunin: ${BDRMS.esc(req.purpose)} • Petsa ng Aplikasyon: ${BDRMS.fmtDate(req.createdAt)} • Bayad: <b>${doc.fee}</b></span>
               </div>
             </div>
 
-            <div style="display:flex; align-items:center; gap: 10px;">
+            <div style="display:flex; align-items:center; gap: 8px; flex-wrap:wrap;">
+              <button class="btn btn-ghost btn-sm" onclick="showResidentClaimStub('${req.id}')" title="I-print ang Claim Stub">
+                ${BDRMS.ICONS.printer} Claim Stub
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="showResidentTimeline('${req.id}')">
+                ${BDRMS.ICONS.clock} Progreso
+              </button>
               ${isReadyOrReleased ? `
                 <button class="btn btn-primary btn-sm" onclick="showResidentCertificate('${req.id}')">
-                  ${BDRMS.ICONS.printer} View & Print Certificate
+                  ${BDRMS.ICONS.badgeCheck} Opisyal na Sertipiko
                 </button>
-              ` : `
-                <button class="btn btn-ghost btn-sm" onclick="showResidentTimeline('${req.id}')">
-                  ${BDRMS.ICONS.clock} View Progress
-                </button>
-              `}
+              ` : ''}
             </div>
           </div>
         `;
@@ -305,57 +352,58 @@
     function renderProfileDetails(resident) {
       const container = document.getElementById('profileDetailsList');
       container.innerHTML = `
-        <div class="kv-row"><dt>Full Name</dt><dd><b>${BDRMS.esc(BDRMS.fullName(resident))}</b></dd></div>
-        <div class="kv-row"><dt>Date of Birth</dt><dd>${BDRMS.fmtDateLong(resident.birthdate)} (${BDRMS.ageOf(resident.birthdate)} years old)</dd></div>
-        <div class="kv-row"><dt>Sex / Civil Status</dt><dd>${resident.sex} • ${resident.civilStatus}</dd></div>
-        <div class="kv-row"><dt>Barangay Address</dt><dd>${BDRMS.esc(resident.address)}</dd></div>
-        <div class="kv-row"><dt>Residency Established</dt><dd>${BDRMS.fmtDateLong(resident.residentSince)} (${BDRMS.residencyText(resident.residentSince)})</dd></div>
-        <div class="kv-row"><dt>Contact Mobile</dt><dd>${BDRMS.esc(resident.contact)}</dd></div>
-        <div class="kv-row"><dt>Portal Username</dt><dd><b class="mono">${BDRMS.esc(resident.username)}</b></dd></div>
+        <div class="kv-row"><dt>Buong Pangalan</dt><dd><b>${BDRMS.esc(BDRMS.fullName(resident))}</b></dd></div>
+        <div class="kv-row"><dt>Araw ng Kapanganakan</dt><dd>${BDRMS.fmtDateLong(resident.birthdate)} (${BDRMS.ageOf(resident.birthdate)} taong gulang)</dd></div>
+        <div class="kv-row"><dt>Kasarian / Katayuang Sibil</dt><dd>${resident.sex} • ${resident.civilStatus}</dd></div>
+        <div class="kv-row"><dt>Tirahan sa Barangay Wawa</dt><dd>${BDRMS.esc(resident.address)}</dd></div>
+        <div class="kv-row"><dt>Tagal ng Paninirahan</dt><dd>${BDRMS.fmtDateLong(resident.residentSince)} (${BDRMS.residencyText(resident.residentSince)})</dd></div>
+        <div class="kv-row"><dt>Mobile Contact</dt><dd>${BDRMS.esc(resident.contact)}</dd></div>
+        <div class="kv-row"><dt>Resident Username</dt><dd class="mono">${BDRMS.esc(resident.username)}</dd></div>
+        <div class="kv-row"><dt>Opisyal na Katayuan</dt><dd><span class="badge badge-released">✅ Inaprubahan ni ${BDRMS.esc(resident.registeredBy || 'Sec. L. Fernandez')}</span></dd></div>
       `;
     }
 
-    function openResidentApplyModal(resident) {
+    function openResidentApplyModal(resident, preselectedDocKey) {
       BDRMS.modal({
-        title: 'Apply for a Barangay Document',
-        subtitle: `Applicant: ${BDRMS.fullName(resident)} (${resident.purok})`,
+        title: 'Mag-apply ng Dokumento',
+        subtitle: `Aplikante: ${BDRMS.fullName(resident)} (${resident.purok}, Barangay Wawa)`,
         wide: true,
         body: `
           <form id="formQuickApply" class="form-grid">
             <div class="field span-2">
-              <label>Select Document Type <span class="req">*</span></label>
+              <label>Piliin ang Uri ng Dokumento <span class="req">*</span></label>
               <select id="qaDocType" class="select">
-                ${Object.entries(BDRMS.DOC_TYPES).map(([k, d]) => `<option value="${k}">${d.name} (${d.fee})</option>`).join('')}
+                ${Object.entries(BDRMS.DOC_TYPES).map(([k, d]) => `<option value="${k}" ${k === preselectedDocKey ? 'selected' : ''}>${d.name} (${d.fee})</option>`).join('')}
               </select>
             </div>
 
             <div class="field span-2">
-              <label>Stated Purpose <span class="req">*</span></label>
-              <input type="text" id="qaPurpose" class="input" placeholder="e.g. Employment / Medical Assistance" required>
+              <label>Tiyak na Layunin (Stated Purpose) <span class="req">*</span></label>
+              <input type="text" id="qaPurpose" class="input" placeholder="hal. Para sa Employment / Medical Assistance / Scholarship" required>
             </div>
 
             <div class="field">
-              <label>Valid ID Type <span class="req">*</span></label>
+              <label>Uri ng Valid ID na Ipakikita <span class="req">*</span></label>
               <select id="qaIdType" class="select">
                 ${BDRMS.ID_TYPES.map(t => `<option value="${t}">${t}</option>`).join('')}
               </select>
             </div>
 
             <div class="field">
-              <label>ID Number <span class="req">*</span></label>
-              <input type="text" id="qaIdNumber" class="input" placeholder="e.g. 1234-5678-9012" required>
+              <label>Numero ng ID <span class="req">*</span></label>
+              <input type="text" id="qaIdNumber" class="input" placeholder="hal. 1234-5678-9012" required>
             </div>
 
             <div class="field span-2">
               <div class="residency-meter ok" style="margin-top:0;">
-                ${BDRMS.ICONS.check} <b>Pre-verified Resident:</b> Your 6-month residency status in Barangay Wawa is already verified on file.
+                ${BDRMS.ICONS.check} <b>Rehistradong Residente:</b> Ang iyong 6-month residency status sa Barangay Wawa ay kumpirmado na sa aming opisyal na talaan.
               </div>
             </div>
           </form>
         `,
         foot: `
-          <button class="btn btn-ghost" data-close>Cancel</button>
-          <button class="btn btn-primary" id="btnSubmitQuickApply">${BDRMS.ICONS.send} Submit Application</button>
+          <button class="btn btn-ghost" data-close>Kanselahin</button>
+          <button class="btn btn-primary" id="btnSubmitQuickApply">${BDRMS.ICONS.send} I-submit ang Application</button>
         `,
         onMount: (modalEl, closeFn) => {
           modalEl.querySelector('#btnSubmitQuickApply').addEventListener('click', () => {
@@ -365,7 +413,7 @@
             const idNumber = modalEl.querySelector('#qaIdNumber').value.trim();
 
             if (!purpose || !idNumber) {
-              BDRMS.toast('Please provide your purpose and ID number.', 'error');
+              BDRMS.toast('Pakilagay ang layunin at numero ng ID.', 'error');
               return;
             }
 
@@ -395,7 +443,7 @@
               residentId: resident.id,
             });
 
-            BDRMS.toast(`Request ${req.ref} submitted successfully!`);
+            BDRMS.toast(`Matagumpay na naipadala ang request! Reference: ${req.ref}`, 'success');
             closeFn();
             renderResidentRequests(resident);
           });
@@ -408,13 +456,58 @@
       if (!req) return;
 
       BDRMS.modal({
-        title: 'Official Document Preview',
-        subtitle: `${BDRMS.DOC_TYPES[req.docType].name} — Barangay Wawa, Abra de Ilog`,
+        title: 'Opisyal na Dokumento — Barangay Wawa',
+        subtitle: `${BDRMS.DOC_TYPES[req.docType].name} (Para sa Pag-print)`,
         wide: true,
         body: BDRMS.certificateHTML(req),
         foot: `
-          <button class="btn btn-ghost" data-close>Close</button>
-          <button class="btn btn-primary" onclick="window.print()">${BDRMS.ICONS.printer} Print Document</button>
+          <button class="btn btn-ghost" data-close>Isara</button>
+          <button class="btn btn-primary" onclick="window.print()">${BDRMS.ICONS.printer} I-print ang Dokumento</button>
+        `,
+      });
+    };
+
+    window.showResidentClaimStub = function(reqId) {
+      const req = BDRMS.data().requests.find(r => r.id === reqId);
+      if (!req) return;
+      const doc = BDRMS.DOC_TYPES[req.docType];
+      const qrSvg = BDRMS.generateQRCodeSVG(`BDRMS:${req.ref}:${req.applicant.lastName}`, 120);
+
+      BDRMS.modal({
+        title: 'Claim Stub / Katibayan sa Pag-apply',
+        subtitle: `Reference: ${req.ref}`,
+        body: `
+          <div style="border: 2px dashed #94a3b8; border-radius: 12px; padding: 24px; background: #ffffff; color: #0f172a; max-width: 540px; margin: 0 auto;">
+            <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 12px; margin-bottom: 16px;">
+              <h3 style="font-size: 1.25rem;">BARANGAY WAWA</h3>
+              <p style="font-size: 0.82rem; color: #475569;">Abra de Ilog, Occidental Mindoro</p>
+              <h4 style="font-size: 0.95rem; margin-top: 4px; color: #059669;">KATIBAYAN SA PAG-APPLY</h4>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <span style="font-size: 0.74rem; text-transform: uppercase; color: #64748b; font-weight: 600;">Reference Code:</span>
+                <div class="mono" style="font-size: 1.4rem; font-weight: 800; color: #059669;">${req.ref}</div>
+                <span style="font-size: 0.8rem; color: #64748b;">Petsa: ${BDRMS.fmtDateTime(req.createdAt)}</span>
+              </div>
+              <div>${qrSvg}</div>
+            </div>
+
+            <div style="display: grid; gap: 6px; font-size: 0.88rem; padding: 12px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div><b>Aplikante:</b> ${BDRMS.esc(BDRMS.fullName(req.applicant))}</div>
+              <div><b>Dokumento:</b> ${BDRMS.esc(doc.name)}</div>
+              <div><b>Bayad:</b> ${doc.fee} (${req.paymentStatus || 'Unpaid'})</div>
+              <div><b>Ipakikitang ID:</b> ${BDRMS.esc(req.idType)}</div>
+            </div>
+
+            <div style="margin-top: 14px; font-size: 0.8rem; color: #475569; border-top: 1px dashed #cbd5e1; padding-top: 10px;">
+              Dalhin ang claim stub na ito at orihinal na Valid ID sa Barangay Hall sa araw ng pagkuha (Lunes–Biyernes, 8am–5pm).
+            </div>
+          </div>
+        `,
+        foot: `
+          <button class="btn btn-ghost" data-close>Isara</button>
+          <button class="btn btn-primary" onclick="window.print()">${BDRMS.ICONS.printer} I-print ang Claim Stub</button>
         `,
       });
     };
@@ -424,28 +517,28 @@
       if (!req) return;
 
       BDRMS.modal({
-        title: `Tracking Progress: ${req.ref}`,
+        title: `Progreso ng Aplikasyon: ${req.ref}`,
         subtitle: BDRMS.DOC_TYPES[req.docType].name,
         wide: false,
         body: `
-          <div style="margin-bottom: 16px;">
+          <div style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;">
             ${BDRMS.statusBadge(req.status)}
-            <p style="font-size:0.84rem; color:var(--muted); margin-top:6px;">${BDRMS.STATUSES[req.status]?.desc || ''}</p>
+            <span style="font-size:0.85rem; color:var(--text-muted);">${BDRMS.STATUSES[req.status]?.desc || ''}</span>
           </div>
           <div class="timeline">
             ${req.history.map(h => `
               <div class="tl-item done" style="padding-bottom:14px;">
-                <div class="tl-dot" style="width:30px; height:30px;">${BDRMS.ICONS.check}</div>
+                <div class="tl-dot" style="width:32px; height:32px;">${BDRMS.ICONS.check}</div>
                 <div class="tl-body">
-                  <strong style="font-size:0.86rem;">${h.status}</strong>
-                  <span style="font-size:0.75rem;">${BDRMS.fmtDateTime(h.at)} • ${h.by}</span>
-                  ${h.note ? `<p style="font-size:0.78rem;">${BDRMS.esc(h.note)}</p>` : ''}
+                  <strong style="font-size:0.88rem;">${h.status}</strong>
+                  <span style="font-size:0.75rem;">${BDRMS.fmtDateTime(h.at)} • ni ${h.by}</span>
+                  ${h.note ? `<p style="font-size:0.8rem; color:var(--text-soft);">${BDRMS.esc(h.note)}</p>` : ''}
                 </div>
               </div>
             `).join('')}
           </div>
         `,
-        foot: `<button class="btn btn-primary" data-close>Close</button>`,
+        foot: `<button class="btn btn-primary" data-close>Isara</button>`,
       });
     };
   </script>

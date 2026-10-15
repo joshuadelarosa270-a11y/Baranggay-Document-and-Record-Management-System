@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barangay Staff & Officials Login — Barangay Wawa</title>
-  <meta name="description" content="Secure administrative login for Barangay Wawa officials and records management personnel.">
+  <title>Staff & Officials Portal Login — Barangay Wawa Records</title>
+  <meta name="description" content="Ligtas at opisyal na login portal para sa mga kawani at opisyal ng Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
   <link rel="stylesheet" href="css/styles.css">
   <style>
     .auth-page {
@@ -12,53 +12,59 @@
       display: grid;
       place-items: center;
       padding: 30px 20px;
-      position: relative;
+      background: var(--bg);
     }
     .auth-card {
-      width: min(460px, 100%);
+      width: min(480px, 100%);
       padding: 38px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-xl);
     }
     .auth-header {
       text-align: center;
-      margin-bottom: 28px;
+      margin-bottom: 26px;
     }
     .auth-header .seal {
       width: 58px;
       height: 58px;
-      margin: 0 auto 16px;
+      margin: 0 auto 14px;
     }
     .auth-header .seal svg {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
     }
     .auth-header h2 {
-      font-size: 1.65rem;
-      margin-bottom: 6px;
+      font-size: 1.55rem;
+      margin-bottom: 4px;
+      color: var(--text);
     }
     .demo-accounts {
       margin-top: 24px;
-      padding-top: 20px;
+      padding-top: 18px;
       border-top: 1px dashed var(--border);
     }
     .demo-accounts span {
       display: block;
       font-size: 0.76rem;
-      color: var(--muted);
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.08em;
       margin-bottom: 10px;
+      font-weight: 600;
     }
     .demo-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
     .demo-btn {
-      padding: 8px 6px;
+      padding: 10px;
       border-radius: 10px;
-      background: var(--surface);
+      background: #f8fafc;
       border: 1px solid var(--border);
-      font-size: 0.76rem;
+      font-size: 0.82rem;
       color: var(--text-soft);
       text-align: center;
       cursor: pointer;
@@ -67,63 +73,69 @@
     .demo-btn:hover {
       border-color: var(--primary);
       background: var(--primary-soft);
-      color: var(--text);
+      color: var(--primary-strong);
     }
   </style>
 </head>
 <body class="auth-page">
 
-  <div class="glass card auth-card">
+  <div class="card auth-card">
     <div class="auth-header">
-      <div class="seal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/><path d="M12 2v3"/>
-        </svg>
-      </div>
+      <a href="index.html" style="display:inline-block;">
+        <div class="seal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/><path d="M12 2v3"/>
+          </svg>
+        </div>
+      </a>
       <h2>Staff & Officials Portal</h2>
       <p class="muted" style="font-size: 0.88rem;">Barangay Wawa, Abra de Ilog, Occidental Mindoro</p>
+    </div>
+
+    <div style="background: #f1f5f9; padding: 12px 14px; border-radius: 10px; margin-bottom: 20px; font-size: 0.82rem; color: var(--text-soft); border-left: 3px solid var(--primary);">
+      <b>Tuntunin sa Tungkulin (Staff Roles):</b>
+      <div style="margin-top: 4px; display: grid; gap: 4px;">
+        <div>🛡️ <b>Admin:</b> Pag-monitor at pagsubaybay sa dashboard, talaan, at audit trail.</div>
+        <div>✍️ <b>Secretary:</b> Pag-apruba ng mga requests at opisyal na pagrehistro ng mga residente.</div>
+      </div>
     </div>
 
     <form id="adminLoginForm" style="display: grid; gap: 18px;">
       <div class="field">
         <label for="username">Staff Username</label>
-        <input type="text" id="username" class="input" placeholder="e.g. secretary or captain" required autocomplete="username">
+        <input type="text" id="username" class="input" placeholder="hal. admin o secretary" required autocomplete="username">
       </div>
 
       <div class="field">
         <label for="password">Password</label>
-        <input type="password" id="password" class="input" placeholder="Enter password" required autocomplete="current-password">
+        <input type="password" id="password" class="input" placeholder="Ilagay ang staff password" required autocomplete="current-password">
       </div>
 
       <button type="submit" class="btn btn-primary btn-block btn-lg" id="btnLoginSubmit" style="margin-top: 6px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;">
           <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
-        Sign In to Portal
+        Mag-login sa Staff Portal
       </button>
     </form>
 
     <div class="demo-accounts">
-      <span>Quick Demo Login (Evaluator Autofill):</span>
+      <span>Pumili ng Demo Account na Ilo-login:</span>
       <div class="demo-grid">
-        <button type="button" class="demo-btn" data-user="secretary" data-pass="secretary123">
-          <b>Secretary</b><br>
-          <span style="font-size:0.68rem; color:var(--muted);">L. Fernandez</span>
-        </button>
-        <button type="button" class="demo-btn" data-user="captain" data-pass="captain123">
-          <b>Punong Brgy</b><br>
-          <span style="font-size:0.68rem; color:var(--muted);">R. Malabanan</span>
-        </button>
         <button type="button" class="demo-btn" data-user="admin" data-pass="admin123">
-          <b>Admin</b><br>
-          <span style="font-size:0.68rem; color:var(--muted);">System</span>
+          <b>System Admin</b><br>
+          <span style="font-size:0.72rem; color:var(--text-muted);">👁️ Pag-monitor Lamang</span>
+        </button>
+        <button type="button" class="demo-btn" data-user="secretary" data-pass="secretary123">
+          <b>Sec. L. Fernandez</b><br>
+          <span style="font-size:0.72rem; color:var(--text-muted);">✍️ Pag-apruba at Pagrehistro</span>
         </button>
       </div>
     </div>
 
-    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.82rem;">
-      <a href="index.html" class="muted" style="text-decoration: underline;">← Back to Public Website</a>
-      <a href="resident-login.html" style="color: var(--primary); font-weight: 500;">Resident Portal →</a>
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.84rem;">
+      <a href="index.html" class="muted" style="text-decoration: underline;">← Bumalik sa Public Website</a>
+      <a href="resident-login.html" style="color: var(--primary); font-weight: 600;">Resident Portal →</a>
     </div>
   </div>
 
@@ -153,12 +165,12 @@
 
         const user = BDRMS.login(u, p);
         if (user) {
-          BDRMS.toast(`Welcome back, ${user.name}! Redirecting...`, 'success');
+          BDRMS.toast(`Maligayang pagbabalik, ${user.name}! Binubuksan ang Staff Portal...`, 'success');
           setTimeout(() => {
             window.location.href = 'admin.html';
-          }, 600);
+          }, 500);
         } else {
-          BDRMS.toast('Invalid staff username or password.', 'error');
+          BDRMS.toast('Maling username o password. Pakisuri muli.', 'error');
         }
       });
     });
