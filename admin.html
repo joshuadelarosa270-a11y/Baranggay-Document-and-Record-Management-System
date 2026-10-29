@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Staff & Officials Portal — Barangay Wawa Records</title>
-  <meta name="description" content="Authorized Administrative and Records Management Portal for Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
+  <title>Executive Admin Portal — Barangay Wawa Records</title>
+  <meta name="description" content="Eksklusibo at protektadong portal para sa Punong Barangay at System Administrator ng Barangay Wawa, Abra de Ilog.">
   <link rel="stylesheet" href="/css/styles.css">
   <link rel="stylesheet" href="/css/admin.css">
   <link rel="stylesheet" href="/css/print.css">
@@ -12,26 +12,33 @@
 <body>
 
   <div class="admin-app">
-    <!-- Sidebar -->
+    <!-- Sidebar for Admin -->
     <aside class="admin-sidebar" id="adminSidebar">
       <div class="sidebar-header">
-        <div class="seal" style="width:36px; height:36px;">
+        <div class="seal" style="width:36px; height:36px; background:linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%);">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;max-width:20px;max-height:20px;">
-            <path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/><path d="M12 2v3"/>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
         <div class="brand-text">
           <strong style="font-size: 0.95rem;">Barangay Wawa</strong>
-          <span style="font-size: 0.68rem;">Staff Portal</span>
+          <span style="font-size: 0.68rem; color: #93c5fd;">Executive Admin</span>
         </div>
       </div>
 
       <nav class="sidebar-nav">
-        <div class="nav-item active" data-tab="tabRequests">
+        <div class="nav-item active" data-tab="tabOverview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+          </svg>
+          <span>Pangkalahatang Dashboard</span>
+        </div>
+
+        <div class="nav-item" data-tab="tabRequests">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/>
           </svg>
-          <span>Document Requests</span>
+          <span>Subaybay sa Dokumento</span>
           <span class="badge-count" id="badgePendingCount">0</span>
         </div>
 
@@ -39,7 +46,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
-          <span>Residents Registry</span>
+          <span>Talaan ng mga Residente</span>
         </div>
 
         <div class="nav-item" data-tab="tabLogs">
@@ -59,43 +66,34 @@
 
       <div class="sidebar-footer">
         <div class="user-card">
-          <div class="user-avatar" id="adminUserAvatar">A</div>
+          <div class="user-avatar" style="background:linear-gradient(135deg, #0f2744 0%, #1e3a8a 100%);">A</div>
           <div class="user-info">
-            <strong id="adminUserName">System Administrator</strong>
-            <span id="adminUserRole">System Administrator</span>
+            <strong>System Administrator</strong>
+            <span>Punong Brgy. / Executive</span>
           </div>
-          <button class="icon-btn" id="btnAdminLogout" title="Sign Out of Staff Portal" style="margin-left:auto; color:var(--danger); border-color: hsla(350,82%,66%,0.3);">
+          <button class="icon-btn" id="btnAdminLogout" title="Mag-logout sa Admin Portal" style="margin-left:auto; color:var(--danger); border-color: hsla(350,82%,66%,0.3);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
           </button>
         </div>
       </div>
     </aside>
 
-    <!-- Main Content Area -->
+    <!-- Main Content for Admin -->
     <main class="admin-main">
       <!-- Topbar -->
       <header class="admin-topbar">
         <div style="display:flex; align-items:center; gap:14px;">
-          <button class="icon-btn menu-toggle" id="adminMenuToggle" type="button" aria-label="Hide sidebar" aria-controls="adminSidebar" aria-expanded="true" title="Hide sidebar"></button>
+          <button class="icon-btn menu-toggle" id="adminMenuToggle" type="button" aria-label="Toggle sidebar" aria-controls="adminSidebar" aria-expanded="true" title="Toggle sidebar"></button>
           <div class="topbar-title">
-            <h2>Document Processing & Records</h2>
+            <h2>Executive Administration & Records Monitoring</h2>
             <p>Barangay Wawa, Abra de Ilog, Occidental Mindoro</p>
           </div>
         </div>
 
         <div class="topbar-actions">
-          <!-- Role Switcher for Interactive Demo / Evaluation -->
-          <div class="role-switcher">
-            <span style="font-weight:600; color:var(--text-soft);">Tungkulin:</span>
-            <button class="role-btn active" data-role="admin" title="System Administrator — Pagsubaybay at Pag-monitor Lamang">
-              🛡️ Admin (Monitor)
-            </button>
-            <button class="role-btn" data-role="secretary" title="Sec. Lorna P. Fernandez — Pag-apruba ng Requests at Pagrehistro ng Residente">
-              ✍️ Secretary (Aprubador)
-            </button>
-            <button class="role-btn" data-role="resident" title="Pumunta sa Resident Portal">
-              👤 Residente
-            </button>
+          <!-- Static Executive Badge (No role switcher) -->
+          <div style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:700; padding:6px 14px; border-radius:20px; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;">
+            🛡️ Punong Barangay & Administrator (Monitor)
           </div>
 
           <button class="btn btn-ghost btn-sm" id="btnExportCSV" title="Export monthly report for DILG / LGU Abra de Ilog">
@@ -103,92 +101,111 @@
             Export DILG Report
           </button>
 
-          <button class="btn btn-primary btn-sm" id="btnOpenWalkin">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
-              <circle cx="13" cy="4" r="2"/><path d="m7 21 3-7 3 2v5M10 14l-1-4 4-2 3 3 3 1M6 11l2-3"/>
-            </svg>
-            Encode Walk-in
-          </button>
-
-          <a href="index.html" class="btn btn-ghost btn-sm" title="Go to Public Resident Portal">
+          <a href="index.html" class="btn btn-ghost btn-sm" title="Pumunta sa Public Website">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
             </svg>
-            Resident Portal
+            Public Website
           </a>
         </div>
       </header>
 
-      <!-- Content Container -->
+      <!-- Content Area -->
       <div class="admin-content">
-        <!-- Dynamic Role Status & Responsibilities Banner -->
-        <div id="adminRoleBannerContainer"></div>
-        <!-- Tab 1: Requests & Applications -->
-        <div class="tab-pane active" id="tabRequests">
-          <!-- Stats Summary Cards -->
+        <!-- Executive Monitoring Banner -->
+        <div class="role-banner role-admin" style="margin-bottom: 24px;">
+          <div class="role-banner-content">
+            <div class="role-banner-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <div class="role-banner-text">
+              <h3>Mode: Pangkalahatang Pagsubaybay at Pamamahala (System Admin)</h3>
+              <p>Sinusubaybayan mo ang kabuuang transaksyon, opisyal na ulat, istatistika, at audit trail ng Barangay Wawa. <b>Paalala:</b> Ang pag-apruba ng mga dokumento at pagrerehistro ng mga residente ay hiwalay at eksklusibong pinamamahalaan ng <b>Tanggapan ng Kalihim (Secretary Lorna P. Fernandez)</b>.</p>
+            </div>
+          </div>
+          <div>
+            <span class="role-badge-pill admin">🛡️ Tagasubaybay Lamang</span>
+          </div>
+        </div>
+
+        <!-- Tab 0: Executive Overview & Analytics -->
+        <div class="tab-pane active" id="tabOverview">
           <div class="stats-grid">
-            <div class="stat-card" data-filter-status="all">
-              <div class="stat-icon" style="background:var(--info-soft); color:var(--info);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
-              </div>
-              <div class="stat-info">
-                <span>Total Requests</span>
-                <strong id="statTotal">0</strong>
-              </div>
-            </div>
-
-            <div class="stat-card" data-filter-status="Under Verification">
-              <div class="stat-icon" style="background:var(--gold-soft); color:var(--gold);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-              </div>
-              <div class="stat-info">
-                <span>For Verification</span>
-                <strong id="statVerification">0</strong>
-              </div>
-            </div>
-
-            <div class="stat-card" data-filter-status="For Approval">
-              <div class="stat-icon" style="background:var(--violet-soft); color:var(--violet);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 17-2.16-1.44a2 2 0 0 0-2.48.22L15 17l-1.5-1.5L12 17"/><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2-2-2-1.67 0-3 2-3 4.5S6 13 7 15c1 2 3 4 3 4"/></svg>
-              </div>
-              <div class="stat-info">
-                <span>For Approval</span>
-                <strong id="statApproval">0</strong>
-              </div>
-            </div>
-
-            <div class="stat-card" data-filter-status="Ready for Pickup">
-              <div class="stat-icon" style="background:var(--primary-soft); color:var(--primary);">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
-              </div>
-              <div class="stat-info">
-                <span>Ready for Pickup</span>
-                <strong id="statReady">0</strong>
-              </div>
-            </div>
-
-            <div class="stat-card" data-filter-status="all">
+            <div class="stat-card" style="cursor:default;">
               <div class="stat-icon" style="background:var(--success-soft); color:var(--success);">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
               <div class="stat-info">
-                <span>Verified Residents</span>
-                <strong id="statResidents">0</strong>
+                <span>Kabuuang Residente</span>
+                <strong id="admTotalResidents">0</strong>
+              </div>
+            </div>
+
+            <div class="stat-card" style="cursor:default;">
+              <div class="stat-icon" style="background:var(--info-soft); color:var(--info);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+              </div>
+              <div class="stat-info">
+                <span>Lahat ng Kahilingan</span>
+                <strong id="admTotalRequests">0</strong>
+              </div>
+            </div>
+
+            <div class="stat-card" style="cursor:default;">
+              <div class="stat-icon" style="background:var(--gold-soft); color:var(--gold);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M17 10a5 5 0 0 0-10 0c0 5 10 3 10 8a5 5 0 0 1-10 0"/></svg>
+              </div>
+              <div class="stat-info">
+                <span>Koleksyon ng Barangay</span>
+                <strong id="admTotalRevenue">₱0</strong>
+              </div>
+            </div>
+
+            <div class="stat-card" style="cursor:default;">
+              <div class="stat-icon" style="background:var(--primary-soft); color:var(--primary);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <div class="stat-info">
+                <span>Efficiency Rate</span>
+                <strong id="admEfficiencyRate">100%</strong>
               </div>
             </div>
           </div>
 
-          <!-- Table Container -->
+          <!-- Analytics Panels Grid -->
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:24px; margin-top:24px;">
+            <div class="table-panel" style="padding:24px;">
+              <h3 style="font-size:1.15rem; margin-bottom:4px;">Populasyon ng Residente Bawat Purok</h3>
+              <p class="muted" style="font-size:0.82rem; margin-bottom:18px;">Distribusyon ng mga opisyal na rehistradong mamamayan sa Purok 1 hanggang 7 ng Barangay Wawa.</p>
+              <div id="admPurokBreakdown" style="display:grid; gap:10px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+
+            <div class="table-panel" style="padding:24px;">
+              <h3 style="font-size:1.15rem; margin-bottom:4px;">Volume ng Dokumento Ayon sa Uri</h3>
+              <p class="muted" style="font-size:0.82rem; margin-bottom:18px;">Dami ng mga clearance, indigency, at sertipiko na hinihiling ng mga mamamayan.</p>
+              <div id="admDocDemandBreakdown" style="display:grid; gap:10px;">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 1: Requests Monitoring -->
+        <div class="tab-pane" id="tabRequests">
           <div class="table-panel">
             <div class="table-toolbar table-toolbar--requests">
               <div class="search-box">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="tableSearch" class="input" placeholder="Search reference, applicant, or purok...">
+                <input type="text" id="tableSearch" class="input" placeholder="Maghanap ng reference number, aplikante, o purok...">
               </div>
 
               <div class="filter-group">
                 <select id="filterDocType" class="select">
-                  <option value="all">All Documents</option>
+                  <option value="all">Lahat ng Dokumento</option>
                   <option value="indigency">Barangay Indigency</option>
                   <option value="clearance">Barangay Clearance</option>
                   <option value="residency">Certificate of Residency</option>
@@ -199,7 +216,7 @@
                 </select>
 
                 <select id="filterStatus" class="select">
-                  <option value="all">All Statuses</option>
+                  <option value="all">Lahat ng Status</option>
                   <option value="Submitted">Submitted</option>
                   <option value="Under Verification">Under Verification</option>
                   <option value="For Approval">For Approval</option>
@@ -209,7 +226,7 @@
                 </select>
 
                 <select id="filterChannel" class="select">
-                  <option value="all">All Channels</option>
+                  <option value="all">Lahat ng Channel</option>
                   <option value="Online">Online Portal</option>
                   <option value="Walk-in">Walk-in (Hall)</option>
                 </select>
@@ -221,12 +238,12 @@
                 <thead>
                   <tr>
                     <th>Reference</th>
-                    <th>Applicant / Address</th>
-                    <th>Document / Purpose</th>
+                    <th>Aplikante / Purok</th>
+                    <th>Dokumento / Layunin</th>
                     <th>Channel</th>
-                    <th>Status</th>
-                    <th>Requested</th>
-                    <th style="text-align: right;">Action</th>
+                    <th>Katayuan</th>
+                    <th>Petsa</th>
+                    <th style="text-align: right;">Aksyon</th>
                   </tr>
                 </thead>
                 <tbody id="requestsTableBody">
@@ -237,37 +254,19 @@
           </div>
         </div>
 
-        <!-- Tab 2: Residents Registry -->
+        <!-- Tab 2: Master Residents Directory -->
         <div class="tab-pane" id="tabResidents">
           <div class="table-panel">
             <div class="table-toolbar">
               <div>
-                <h3 style="font-size: 1.15rem;" id="residentsViewTitle">Talaan ng mga Residente — Barangay Wawa</h3>
-                <p class="muted" style="font-size: 0.82rem;" id="residentsViewSubtitle">Opisyal na rehistro ng mga mamamayan na naninirahan sa Barangay Wawa, Abra de Ilog.</p>
-              </div>
-              <div style="display:flex; align-items:center; gap:10px;">
-                <button class="btn btn-primary btn-sm" id="btnAddResident">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M12 5v14M5 12h14"/></svg>
-                  Magrehistro ng Residente
-                </button>
-              </div>
-            </div>
-
-            <!-- Sub-tabs for Active vs Pending Approvals -->
-            <div style="padding: 0 20px 10px;">
-              <div class="sub-tabs-bar">
-                <button class="btn-subtab active" id="subtabActiveResidents" data-subtab="active">
-                  🏛️ Rehistradong Residente (<span id="countActiveResidents">0</span>)
-                </button>
-                <button class="btn-subtab" id="subtabPendingResidents" data-subtab="pending">
-                  ⏳ Hinihintay na Pag-apruba ni Secretary (<span id="countPendingResidents">0</span>)
-                </button>
+                <h3 style="font-size: 1.15rem;">Master Records: Talaan ng mga Residente</h3>
+                <p class="muted" style="font-size: 0.82rem;">Kabuuang opisyal na rehistro ng mamamayan ng Barangay Wawa para sa executive monitoring.</p>
               </div>
             </div>
 
             <div class="data-table-wrap">
               <table class="data-table">
-                <thead id="residentsTableHead">
+                <thead>
                   <tr>
                     <th>Resident ID</th>
                     <th>Buong Pangalan</th>
@@ -290,8 +289,8 @@
           <div class="table-panel">
             <div class="table-toolbar">
               <div>
-                <h3 style="font-size: 1.15rem;">Security & Activity Audit Logs</h3>
-                <p class="muted" style="font-size: 0.82rem;">Immutable trail of all staff logins, identity checks, approvals, releases, and data reveals.</p>
+                <h3 style="font-size: 1.15rem;">System Security & Activity Audit Trail</h3>
+                <p class="muted" style="font-size: 0.82rem;">Hindi nababagong talaan (immutable log) ng lahat ng login, pag-apruba, pag-print, at transaksyon sa barangay.</p>
               </div>
             </div>
 
@@ -301,7 +300,7 @@
                   <tr>
                     <th>Timestamp</th>
                     <th>Actor / Staff</th>
-                    <th>Action</th>
+                    <th>Isinagawang Aksyon</th>
                     <th>Target Record</th>
                   </tr>
                 </thead>
@@ -317,28 +316,28 @@
         <div class="tab-pane" id="tabSettings">
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
             <div class="glass card">
-              <h3 style="font-size: 1.25rem; margin-bottom: 14px;">Barangay Wawa Officials</h3>
+              <h3 style="font-size: 1.25rem; margin-bottom: 14px;">Barangay Wawa Master Configuration</h3>
               <div class="kv-list">
-                <div class="kv-row"><dt>Authorized Staff</dt><dd><b>System Administrator & Barangay Secretary</b></dd></div>
-                <div class="kv-row"><dt>Barangay Secretary</dt><dd><b>Lorna P. Fernandez</b></dd></div>
-                <div class="kv-row"><dt>Municipality</dt><dd>Abra de Ilog</dd></div>
-                <div class="kv-row"><dt>Province</dt><dd>Occidental Mindoro</dd></div>
-                <div class="kv-row"><dt>Office Hours</dt><dd>Monday – Friday, 8:00 AM – 5:00 PM</dd></div>
-                <div class="kv-row"><dt>Residency Requirement</dt><dd>Minimum of 6 months</dd></div>
+                <div class="kv-row"><dt>Punong Barangay</dt><dd><b>Hon. Barangay Captain</b></dd></div>
+                <div class="kv-row"><dt>Kalihim ng Barangay</dt><dd><b>Sec. Lorna P. Fernandez</b></dd></div>
+                <div class="kv-row"><dt>Bayan / Bayan</dt><dd>Abra de Ilog</dd></div>
+                <div class="kv-row"><dt>Lalawigan</dt><dd>Occidental Mindoro</dd></div>
+                <div class="kv-row"><dt>Oras ng Tanggapan</dt><dd>Lunes – Biyernes, 8:00 AM – 5:00 PM</dd></div>
+                <div class="kv-row"><dt>Residency Requirement</dt><dd>Minimum ng 6 na buwan</dd></div>
               </div>
             </div>
 
             <div class="glass card">
-              <h3 style="font-size: 1.25rem; margin-bottom: 14px;">Academic Project Context</h3>
+              <h3 style="font-size: 1.25rem; margin-bottom: 14px;">Pamamahala sa Sistema & Demo Reset</h3>
               <p class="muted" style="font-size: 0.88rem; line-height: 1.6;">
-                <b>Laboratory Activity 1 – Part 1: Project Proposal</b><br>
-                Group Members: Joshua Dela Rosa, Angela Espinosa, Nicole Guevarra, Era May Roxas<br>
-                Section: 1E • Date of Observation & Interviews: August 16, 2026
+                <b>Academic Capstone / Midterm Project: BDRMS</b><br>
+                Barangay Wawa, Abra de Ilog, Occidental Mindoro<br>
+                Group 1E: Joshua Dela Rosa, Angela Espinosa, Nicole Guevarra, Era May Roxas
               </p>
               <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
                 <button class="btn btn-danger btn-sm" id="btnResetData">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-                  Reset Demo Database to Default
+                  I-reset ang Demo Database sa Default
                 </button>
               </div>
             </div>

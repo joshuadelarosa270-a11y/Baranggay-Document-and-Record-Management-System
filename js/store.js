@@ -458,6 +458,8 @@ const BDRMS = (() => {
   }
   function logout(reason) { const u = currentUser(); if (u) log(u, reason || 'Staff logged out'); sessionStorage.removeItem(SESSION_STAFF_KEY); }
   const can = (u, perm) => !!u && ROLES[u.role].can.includes(perm);
+  const isSecretary = (u = currentUser()) => !!u && u.role === 'secretary';
+  const isAdmin = (u = currentUser()) => !!u && u.role === 'admin';
 
   /* ---------- Resident Session (Dedicated Resident Portal) ---------- */
   function loginResident(identifier, password) {
@@ -772,7 +774,7 @@ const BDRMS = (() => {
     data, load, save, reset, uid, esc, fmtDate, fmtDateLong, fmtDateTime, timeAgo, monthsBetween, residencyText, ageOf,
     fullName, maskName, maskPhone, maskEmail, findResidentMatch, createRequest, trackRequest, log,
     deviceRefs, addDeviceRef,
-    login, currentUser, logout, can,
+    login, currentUser, logout, can, isSecretary, isAdmin,
     loginResident, currentResident, logoutResident, registerResident,
     registerResidentOnline, registerResidentBySecretary, approveResidentBySecretary, rejectResidentBySecretary,
     exportRequestsCSV, generateQRCodeSVG,

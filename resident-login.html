@@ -152,7 +152,7 @@
 
     <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:0.84rem;">
       <a href="index.html" class="muted" style="text-decoration:underline;">&#8592; Bumalik sa Public Website</a>
-      <a href="admin-login.html" style="color:var(--primary); font-weight:600;">Staff / Admin Portal &#8594;</a>
+      <a href="secretary-login.html" style="color:var(--primary); font-weight:600;">Tanggapan ng Kalihim (Secretary Portal) &#8594;</a>
     </div>
   </div>
 
@@ -230,7 +230,7 @@
             title: res.pending ? '⏳ Naghihintay ng Pag-apruba ni Secretary' : 'Hindi Makapasok',
             subtitle: 'Barangay Resident Portal • Barangay Wawa',
             body: '<p style="line-height:1.6; color:var(--text);">' + BDRMS.esc(res.message) + '</p>' +
-                  (res.pending ? '<div style="margin-top:14px; padding:12px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; font-size:0.84rem; color:#92400e;">💡 <b>Para sa Pagsusuri:</b> Maaari kang mag-login sa <b>Staff Portal</b> bilang <b>Secretary (Sec. L. Fernandez)</b> upang i-click ang <i>Aprubahan at I-rehistro</i> para sa residenteng ito.</div>' : ''),
+                  (res.pending ? '<div style="margin-top:14px; padding:12px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; font-size:0.84rem; color:#92400e;">💡 <b>Para sa Pagsusuri:</b> Maaari kang mag-login sa <b>Tanggapan ng Kalihim</b> bilang <b>Secretary (Sec. L. Fernandez)</b> upang i-click ang <i>Aprubahan at I-rehistro</i> para sa residenteng ito.</div>' : ''),
             foot: '<button class="btn btn-primary" data-close>Naiintindihan Ko</button>'
           });
         }
