@@ -120,13 +120,14 @@ window.BDRMSCloud = (() => {
   }
   async function loginResident(email, password) {
     await signIn(email, password);
-    if (staff) { await logout(); return { success: false, message: 'Gamitin ang Barangay Staff Login para sa account na ito.' }; }
+    if (staff) return { success: true, staff: currentUser() };
     const resident = BDRMS.data().residents.find(row => row.authUserId === user.id);
     if (!resident || resident.status !== 'active' || !resident.verified) {
       const rejected = resident?.status === 'rejected';
       await logout();
-      return { success: false, pending: !rejected,
-        message: rejected ? 'Hindi naaprubahan ang pagpapatala. Makipag-ugnayan sa barangay hall.' :
+      return { success: false, pending: !!resident && !rejected,
+        message: !resident ? 'Walang resident profile o aktibong staff role ang account na ito. Ipasuri sa administrator ang nakatalagang role.' :
+          rejected ? 'Hindi naaprubahan ang pagpapatala. Makipag-ugnayan sa barangay hall.' :
           'Kailangan muna ang pag-apruba ng barangay staff bago magamit ang resident portal.' };
     }
     return { success: true, resident };

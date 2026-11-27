@@ -53,6 +53,16 @@ security/performance advisors after installing the schema.
 
 ## Cloudflare Pages
 
+For the current workers.dev deployment, use the repository-root wrangler.jsonc.
+Build command: node scripts/build-cloudflare.cjs
+Deploy command: npx wrangler deploy
+The Wrangler config builds and uploads only ./dist. Do not override it with
+--assets . or upload the repository root. After deployment, /staff-login.html
+is the admin/staff entry. A staff account entered on the resident form is also
+routed according to its database staff role, without a public role selector.
+
+The table below is for an alternative Pages deployment.
+
 | Setting | Value |
 | --- | --- |
 | Framework preset | None |
@@ -60,7 +70,7 @@ security/performance advisors after installing the schema.
 | Build command | node scripts/build-cloudflare.cjs |
 | Build output directory | dist |
 
-Preview the branch first; merge after database installation and live verification.
+Complete database installation and live verification before using real records.
 Only app assets go into dist. SQL, tests, documents and development files are
 excluded. The previously shared legacy service-role key must be revoked/rotated
 separately in Supabase API Keys.

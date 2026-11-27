@@ -81,6 +81,17 @@ test('pending residents cannot enter the resident dashboard', async () => {
   assert.equal(result.pending, true);
   assert.equal(s.app.currentResident(), null);
 });
+test('staff using the resident form still receive their database-assigned staff role', async () => {
+  for (const role of ['admin', 'secretary', 'staff']) {
+    const s = sandbox({ role });
+    await s.app.ready;
+    const result = await s.app.loginResident('test@example.invalid', 'test-password');
+    assert.equal(result.success, true);
+    assert.equal(result.staff.role, role === 'admin' ? 'admin' : 'secretary');
+    assert.ok(s.app.currentUser());
+    assert.equal(s.app.currentResident(), null);
+  }
+});
 test('request submission waits for cloud commit and returns the server record', async () => {
   let release;
   const gate = new Promise(resolve => { release = resolve; });

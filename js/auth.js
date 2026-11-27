@@ -40,6 +40,11 @@ function initStaffLogin(form) {
 }
 
 function initResidentLogin(form) {
+  const staffAccount = BDRMS.currentUser();
+  if (staffAccount) {
+    window.location.replace(staffAccount.role === 'admin' ? 'admin.html' : 'secretary.html');
+    return;
+  }
   const params = new URLSearchParams(window.location.search);
   const requestedDoc = params.get('doc');
   const docKey = params.get('from') === 'apply' && Object.hasOwn(BDRMS.DOC_TYPES, requestedDoc) ? requestedDoc : '';
@@ -61,7 +66,7 @@ function initResidentLogin(form) {
     submitToCloud(form, async () => {
     const result = await BDRMS.loginResident(form.elements.username.value, form.elements.password.value);
     if (result.success) {
-      window.location.replace(dashboard);
+      window.location.replace(result.staff ? (result.staff.role === 'admin' ? 'admin.html' : 'secretary.html') : dashboard);
     } else {
       showFeedback(form, result.message, result.pending ? 'notice' : 'error');
     }
