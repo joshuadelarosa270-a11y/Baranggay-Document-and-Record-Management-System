@@ -4,9 +4,6 @@
    ========================================================================== */
 
 const BDRMS = (() => {
-  const STORAGE_KEY = 'bdrms_data_v2';
-  const SESSION_STAFF_KEY = 'bdrms_staff_session';
-  const SESSION_RESIDENT_KEY = 'bdrms_resident_session';
   const DEVICE_KEY = 'bdrms_device_refs';
   const RESIDENCY_MONTHS = 6;
 
@@ -157,7 +154,7 @@ const BDRMS = (() => {
   const PUROKS = ['Purok 1', 'Purok 2', 'Purok 3', 'Purok 4', 'Purok 5', 'Purok 6', 'Purok 7'];
 
   /* ---------- Utils ---------- */
-  const uid = (p = 'id') => `${p}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+  const uid = (p = 'id') => p + '_' + crypto.randomUUID();
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const daysAgo = (d, h = 9) => { const t = new Date(); t.setDate(t.getDate() - d); t.setHours(h, Math.floor(Math.random() * 59), 0, 0); return t.toISOString(); };
   const monthsAgo = (m) => { const t = new Date(); t.setMonth(t.getMonth() - m); return t.toISOString().slice(0, 10); };
@@ -229,159 +226,16 @@ const BDRMS = (() => {
     return `<svg viewBox="0 0 84 84" width="${size}" height="${size}" style="display:block; background:#fff; padding:4px; border:1px solid #cbd5e1; border-radius:6px;" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
   }
 
-  /* ---------- Seed data (fictional sample records) ---------- */
-  function seed() {
-    const rawResidents = [
-      ['Maria', 'Santos', 'Reyes', '', '1990-03-14', 'Female', 'Married', 'Purok 1', '09171234561', 'maria.reyes', 120],
-      ['Jose', 'Garcia', 'Mendoza', 'Jr.', '1985-07-22', 'Male', 'Married', 'Purok 2', '09181234562', 'jose.mendoza', 200],
-      ['Ana', 'Lopez', 'Villanueva', '', '2003-11-05', 'Female', 'Single', 'Purok 3', '09191234563', 'ana.lopez', 60],
-      ['Ramon', 'Cruz', 'Bautista', '', '1962-01-30', 'Male', 'Widowed', 'Purok 1', '09201234564', 'ramon.cruz', 400],
-      ['Liza', 'Ramos', 'Aquino', '', '1995-05-18', 'Female', 'Single', 'Purok 4', '09211234565', 'liza.aquino', 36],
-      ['Pedro', 'Tolentino', 'Castillo', '', '1978-09-09', 'Male', 'Married', 'Purok 5', '09221234566', 'pedro.castillo', 150],
-      ['Kristine', 'Dizon', 'Navarro', '', '2004-02-27', 'Female', 'Single', 'Purok 2', '09231234567', 'kristine.navarro', 4],
-      ['Carlos', 'Manalo', 'Fernandez', '', '1988-12-12', 'Male', 'Single', 'Purok 6', '09241234568', 'carlos.manalo', 84],
-      ['Rosario', 'Valdez', 'De Guzman', '', '1970-06-03', 'Female', 'Married', 'Purok 3', '09251234569', 'rosario.deguzman', 300],
-      ['Mark', 'Salazar', 'Pascual', '', '2002-08-16', 'Male', 'Single', 'Purok 7', '09261234570', 'mark.pascual', 48],
-      ['Jenny', 'Ocampo', 'Torres', '', '1999-04-21', 'Female', 'Married', 'Purok 4', '09271234571', 'jenny.torres', 18],
-      ['Antonio', 'Flores', 'Gonzales', 'Sr.', '1955-10-10', 'Male', 'Married', 'Purok 5', '09281234572', 'antonio.gonzales', 500],
-    ];
-
-    const residents = rawResidents.map(([firstName, middleName, lastName, suffix, birthdate, sex, civilStatus, purok, contact, username, months], i) => ({
-      id: `res_${i + 1}`,
-      username: username || `resident_${i + 1}`,
-      password: 'resident123', // Demo password for all seeded residents
-      firstName, middleName, lastName, suffix, birthdate, sex, civilStatus, purok,
-      address: `${purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
-      contact, email: `${username || 'resident'}@example.com`, residentSince: monthsAgo(months),
-      verified: true,
-      status: 'active',
-      registeredBy: 'Sec. L. Fernandez',
-      registrationChannel: 'Official Secretary Registration',
-      createdAt: daysAgo(90 + i),
-    }));
-
-    // Seed 2 sample residents pending Secretary approval to demonstrate the approval workflow
-    residents.push({
-      id: 'res_pending_1',
-      username: 'rica.alcantara',
-      password: 'resident123',
-      firstName: 'Rica Mae',
-      middleName: 'Santos',
-      lastName: 'Alcantara',
-      suffix: '',
-      birthdate: '1998-05-12',
-      sex: 'Female',
-      civilStatus: 'Single',
-      purok: 'Purok 4',
-      address: 'Purok 4, Barangay Wawa, Abra de Ilog, Occidental Mindoro',
-      contact: '09179998811',
-      email: 'rica.alcantara@example.com',
-      residentSince: monthsAgo(14),
-      verified: false,
-      status: 'pending_approval',
-      registeredBy: null,
-      registrationChannel: 'Online Pre-Registration',
-      notes: 'Online pre-registration with proof of residency in Purok 4.',
-      createdAt: daysAgo(1, 14),
-    });
-
-    residents.push({
-      id: 'res_pending_2',
-      username: 'danilo.mercado',
-      password: 'resident123',
-      firstName: 'Danilo',
-      middleName: 'Ramos',
-      lastName: 'Mercado',
-      suffix: '',
-      birthdate: '1982-09-20',
-      sex: 'Male',
-      civilStatus: 'Married',
-      purok: 'Purok 2',
-      address: 'Purok 2, Barangay Wawa, Abra de Ilog, Occidental Mindoro',
-      contact: '09188887722',
-      email: 'danilo.mercado@example.com',
-      residentSince: monthsAgo(36),
-      verified: false,
-      status: 'pending_approval',
-      registeredBy: null,
-      registrationChannel: 'Online Pre-Registration',
-      notes: 'Online pre-registration with voter certificate.',
-      createdAt: daysAgo(2, 9),
-    });
-
-    const mk = (n, resIdx, docType, purpose, channel, statusIdx, created, opts = {}) => {
-      const r = residents[resIdx];
-      const history = [];
-      const actors = ['System', 'Sec. L. Fernandez', 'Sec. L. Fernandez', 'Admin', 'Sec. L. Fernandez'];
-      const steps = opts.rejected ? FLOW.slice(0, statusIdx + 1) : FLOW.slice(0, statusIdx + 1);
-      steps.forEach((s, i) => history.push({ status: s, by: channel === 'Walk-in' && i === 0 ? 'Sec. L. Fernandez' : actors[i], at: new Date(new Date(created).getTime() + i * 3600e3 * (3 + i)).toISOString(), note: i === 0 ? (channel === 'Online' ? 'Submitted through the online portal.' : 'Encoded at the barangay hall (walk-in).') : '' }));
-      if (opts.rejected) history.push({ status: 'Rejected', by: 'Sec. L. Fernandez', at: new Date(new Date(created).getTime() + 8 * 3600e3).toISOString(), note: opts.rejected });
-      const isFeeFree = DOC_TYPES[docType].fee.includes('Free');
-      const isReleased = statusIdx === 4 && !opts.rejected;
-      const orNumber = isReleased ? (isFeeFree ? 'EXEMPT-RA11261' : `OR-2026-${String(4100 + n * 13).padStart(5, '0')}`) : (opts.orNumber || '');
-      const paymentStatus = isFeeFree ? 'Exempt' : (isReleased ? 'Paid' : 'Unpaid');
-
-      return {
-        id: `req_${n}`, ref: `BW-2610-${['K7QM', 'P3XA', 'H8ZT', 'D4NW', 'R2LC', 'F9VB', 'M6TJ', 'C5YE', 'W3GH', 'T8PK', 'B2RD', 'N7SU', 'J4AX', 'Q9LF'][n - 1]}`,
-        residentId: r.id,
-        applicant: { firstName: r.firstName, middleName: r.middleName, lastName: r.lastName, suffix: r.suffix, birthdate: r.birthdate, sex: r.sex, civilStatus: r.civilStatus, purok: r.purok, contact: r.contact, email: r.email, residentSince: r.residentSince },
-        docType, purpose, extra: opts.extra || {}, idType: opts.idType || 'PhilSys National ID', idLast4: opts.idLast4 || String(1000 + n * 37).slice(-4),
-        channel, status: opts.rejected ? 'Rejected' : FLOW[statusIdx],
-        verification: { identity: statusIdx >= 1, residency: statusIdx >= 1, blotterCleared: true },
-        paymentStatus,
-        orNumber,
-        remarks: opts.rejected || '', history, createdAt: created, updatedAt: history[history.length - 1].at,
-      };
-    };
-
-    const requests = [
-      mk(1, 0, 'clearance', 'Employment', 'Online', 4, daysAgo(18)),
-      mk(2, 1, 'bilihan', 'Sale of livestock', 'Walk-in', 4, daysAgo(15), { extra: { item: '1 carabao, male, 5 years old', otherParty: 'Ernesto Lagman' } }),
-      mk(3, 2, 'jobseeker', 'First-time employment application', 'Online', 3, daysAgo(6), { extra: { education: 'College graduate' } }),
-      mk(4, 3, 'indigency', 'Medical assistance', 'Walk-in', 3, daysAgo(4), { idType: 'Senior Citizen ID' }),
-      mk(5, 4, 'residency', 'Bank requirement', 'Online', 2, daysAgo(3)),
-      mk(6, 5, 'barangayid', 'Identification', 'Online', 1, daysAgo(2), { extra: { emergencyName: 'Lorna Castillo', emergencyContact: '09170001111' } }),
-      mk(7, 6, 'jobseeker', 'First-time employment application', 'Online', 0, daysAgo(1, 10), { extra: { education: 'Senior High School graduate' } }),
-      mk(8, 7, 'clearance', 'Business permit', 'Walk-in', 2, daysAgo(2, 14)),
-      mk(9, 8, 'indigency', 'Educational / scholarship', 'Online', 0, daysAgo(0, 8)),
-      mk(10, 9, 'fileaction', 'Filing of case in court / prosecutor', 'Walk-in', 2, daysAgo(5), { extra: { respondent: 'Rodel Sison', caseNo: 'KP-2026-014' } }),
-      mk(11, 10, 'residency', 'School enrollment', 'Online', 1, daysAgo(1, 15)),
-      mk(12, 11, 'clearance', 'Loan application', 'Online', 1, daysAgo(9), { rejected: 'Cedula for the current year was not presented. Please re-apply with a valid Cedula.' }),
-      mk(13, 0, 'indigency', 'PhilHealth / PCSO', 'Online', 0, daysAgo(0, 7)),
-      mk(14, 5, 'residency', 'Government transaction', 'Walk-in', 4, daysAgo(24)),
-    ];
-
-    const logs = [
-      { id: uid('log'), at: daysAgo(0, 8), user: 'System', role: 'system', action: 'Demo database v2 initialized with Barangay Wawa registry', target: '' },
-    ];
-
-    return {
-      version: 2,
-      settings: {
-        barangay: 'Barangay Wawa', municipality: 'Abra de Ilog', province: 'Occidental Mindoro',
-        secretary: 'Lorna P. Fernandez',
-        hours: 'Monday – Friday, 8:00 AM – 5:00 PM',
-      },
-      users: [
-        { username: 'admin', password: 'admin123', role: 'admin', name: 'System Administrator', short: 'Admin' },
-        { username: 'secretary', password: 'secretary123', role: 'secretary', name: 'Lorna P. Fernandez', short: 'Sec. L. Fernandez' },
-      ],
-      residents, requests, logs,
-    };
-  }
-
-  /* ---------- Persistence ---------- */
-  let db = null;
-  function load() {
-    try { db = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch { db = null; }
-    if (!db || db.version !== 2) { db = seed(); save(); }
-    return db;
-  }
-  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(db)); }
-  function reset() { db = seed(); save(); return db; }
-  const data = () => db || load();
-
-  window.addEventListener('storage', (e) => { if (e.key === STORAGE_KEY) { db = null; load(); document.dispatchEvent(new CustomEvent('bdrms:sync')); } });
+  /* ---------- Cloud data cache (no demo data or passwords) ---------- */
+  let db = { version: 3, users: [], residents: [], requests: [], logs: [],
+    settings: { barangay: 'Barangay Wawa', municipality: 'Abra de Ilog',
+      province: 'Occidental Mindoro', secretary: 'Barangay Secretary',
+      hours: 'Makipag-ugnayan sa barangay hall para sa oras ng serbisyo.' } };
+  const data = () => db;
+  const load = () => db;
+  const replaceData = next => { db = next; return db; };
+  const save = () => window.BDRMSCloud.save(db);
+  const reset = () => { throw new Error('Hindi maaaring i-reset ang cloud database mula sa browser.'); };
 
   /* ---------- Domain operations ---------- */
   function findResidentMatch(a) {
@@ -389,7 +243,7 @@ const BDRMS = (() => {
     return data().residents.find((r) => n(r.firstName) === n(a.firstName) && n(r.lastName) === n(a.lastName) && r.birthdate === a.birthdate) || null;
   }
 
-  function createRequest({ applicant, docType, purpose, extra, idType, idNumber, channel, by, residentId, status, paymentStatus, orNumber, remarks, history, verification }) {
+  async function createRequest({ applicant, docType, purpose, extra, idType, idNumber, channel, by, residentId, status, paymentStatus, orNumber, remarks, history, verification }) {
     let ref; do { ref = genRef(); } while (data().requests.some((r) => r.ref === ref));
     const now = new Date().toISOString();
     const match = residentId ? data().residents.find(r => r.id === residentId) : findResidentMatch(applicant);
@@ -420,8 +274,8 @@ const BDRMS = (() => {
       createdAt: now, updatedAt: now,
     };
     data().requests.unshift(req);
-    save();
-    return req;
+    await save();
+    return data().requests.find(row => row.id === req.id) || req;
   }
 
   function trackRequest(ref, lastName) {
@@ -431,238 +285,25 @@ const BDRMS = (() => {
     return r;
   }
 
-  function log(user, action, target = '') {
-    data().logs.unshift({ id: uid('log'), at: new Date().toISOString(), user: user ? (user.short || user.name) : 'System', role: user ? user.role : 'system', action, target });
-    if (data().logs.length > 500) data().logs.length = 500;
-    save();
-  }
-
+  // Database triggers generate the authoritative audit trail.
+  function log() {}
   function deviceRefs() { try { return JSON.parse(localStorage.getItem(DEVICE_KEY)) || []; } catch { return []; } }
   function addDeviceRef(ref, lastName) { const l = deviceRefs().filter((x) => x.ref !== ref); l.unshift({ ref, lastName }); localStorage.setItem(DEVICE_KEY, JSON.stringify(l.slice(0, 6))); }
 
-  /* ---------- Staff Session ---------- */
-  const SESSION_TIMEOUT = 30 * 60 * 1000;
-  function login(username, password, role) {
-    const u = data().users.find((x) => x.username === username.trim().toLowerCase() &&
-      x.password === password && (!role || x.role === role));
-    if (!u) return null;
-    log(u, 'Staff logged in');
-    sessionStorage.setItem(SESSION_STAFF_KEY, JSON.stringify({ username: u.username, last: Date.now() }));
-    return u;
-  }
-  function currentUser() {
-    try {
-      const s = JSON.parse(sessionStorage.getItem(SESSION_STAFF_KEY));
-      if (!s) return null;
-      if (Date.now() - s.last > SESSION_TIMEOUT) { sessionStorage.removeItem(SESSION_STAFF_KEY); return null; }
-      return data().users.find((u) => u.username === s.username) || null;
-    } catch { return null; }
-  }
-  function logout(reason) { const u = currentUser(); if (u) log(u, reason || 'Staff logged out'); sessionStorage.removeItem(SESSION_STAFF_KEY); }
-  const can = (u, perm) => !!u && ROLES[u.role].can.includes(perm);
+  /* ---------- Supabase Auth and resident operations ---------- */
+  const login = (...args) => window.BDRMSCloud.login(...args);
+  const currentUser = () => window.BDRMSCloud.currentUser();
+  const logout = () => window.BDRMSCloud.logout();
+  const loginResident = (...args) => window.BDRMSCloud.loginResident(...args);
+  const currentResident = () => window.BDRMSCloud.currentResident();
+  const logoutResident = logout;
+  const can = (u, perm) => !!u && !!ROLES[u.role]?.can.includes(perm);
   const isSecretary = (u = currentUser()) => !!u && u.role === 'secretary';
   const isAdmin = (u = currentUser()) => !!u && u.role === 'admin';
-
-  /* ---------- Resident Session (Dedicated Resident Portal) ---------- */
-  function normalizePhone(value) {
-    const text = String(value || '').trim();
-    if (!/^\+?[\d\s().-]+$/.test(text)) return '';
-    return text.replace(/\D/g, '').replace(/^63(9\d{9})$/, '0$1');
-  }
-
-  function findResidentByIdentifier(identifier) {
-    const normalized = identifier.trim().toLowerCase();
-    if (!normalized) return null;
-    const phone = normalizePhone(normalized);
-    return data().residents.find((resident) =>
-      resident.username?.toLowerCase() === normalized ||
-      resident.email?.toLowerCase() === normalized ||
-      (phone && normalizePhone(resident.contact) === phone)
-    ) || null;
-  }
-
-  const canSignInResident = (resident) => resident?.verified &&
-    resident.status !== 'pending_approval' && resident.status !== 'rejected';
-
-  function loginResident(identifier, password) {
-    const r = findResidentByIdentifier(identifier);
-    if (!r || !r.password || r.password !== password) {
-      return {
-        success: false,
-        message: 'Pakisuri ang username o mobile number at ang iyong password.'
-      };
-    }
-
-    if (r.status === 'rejected') {
-      return {
-        success: false,
-        rejected: true,
-        message: 'Hindi naaprubahan ang pagpapatala. Makipag-ugnayan sa Tanggapan ng Kalihim.'
-      };
-    }
-
-    if (!canSignInResident(r)) {
-      return {
-        success: false,
-        pending: true,
-        message: 'Sinusuri pa ng Kalihim ang iyong pagpapatala. Maaari kang mag-login kapag naaprubahan na ito.'
-      };
-    }
-
-    log({ short: fullName(r), role: 'resident' }, `Resident logged into portal`, r.id);
-    sessionStorage.setItem(SESSION_RESIDENT_KEY, JSON.stringify({ residentId: r.id, last: Date.now() }));
-    return { success: true, resident: r };
-  }
-
-  function currentResident() {
-    try {
-      const s = JSON.parse(sessionStorage.getItem(SESSION_RESIDENT_KEY));
-      if (!s) return null;
-      const resident = data().residents.find((r) => r.id === s.residentId);
-      if (canSignInResident(resident)) return resident;
-      sessionStorage.removeItem(SESSION_RESIDENT_KEY);
-      return null;
-    } catch { return null; }
-  }
-
-  function logoutResident() {
-    const r = currentResident();
-    if (r) log({ short: fullName(r), role: 'resident' }, 'Resident logged out');
-    sessionStorage.removeItem(SESSION_RESIDENT_KEY);
-  }
-
-  function validateResidentRegistration(regData, requireBirthdate) {
-    if (!PUROKS.includes(regData.purok)) {
-      throw new Error('Dapat ay naninirahan sa Barangay Wawa (Purok 1 hanggang Purok 7).');
-    }
-    if (!regData.firstName?.trim() || !regData.lastName?.trim()) {
-      throw new Error('Ilagay ang iyong unang pangalan at apelyido.');
-    }
-    const username = regData.username?.trim().toLowerCase();
-    const contact = normalizePhone(regData.contact);
-    if (!username) throw new Error('Maglagay ng username.');
-    if (!/^09\d{9}$/.test(contact)) throw new Error('Maglagay ng wastong mobile number (09XX XXX XXXX).');
-    if (!regData.password || regData.password.length < 6) {
-      throw new Error('Gumamit ng password na may hindi bababa sa 6 na karakter.');
-    }
-
-    const now = new Date();
-    const validPastDate = (value) => {
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-      const date = new Date(value + 'T00:00:00');
-      return date <= now && date.getMonth() + 1 === Number(value.slice(5, 7)) &&
-        date.getDate() === Number(value.slice(8, 10));
-    };
-    if ((requireBirthdate || regData.birthdate) && !validPastDate(regData.birthdate)) {
-      throw new Error('Maglagay ng wastong petsa ng kapanganakan.');
-    }
-    if (!validPastDate(regData.residentSince) || (regData.birthdate && regData.residentSince < regData.birthdate)) {
-      throw new Error('Suriin ang petsa ng simula ng paninirahan.');
-    }
-    if (findResidentByIdentifier(username) || findResidentByIdentifier(contact)) {
-      throw new Error('May rehistradong gumagamit na ng username o mobile number na ito.');
-    }
-    return { username, contact };
-  }
-
-  // Resident submits pre-registration online (Requires Secretary approval to activate login)
-  function registerResidentOnline(regData) {
-    const { username, contact } = validateResidentRegistration(regData, true);
-    const id = uid('res');
-    const newRes = {
-      id,
-      username,
-      password: regData.password,
-      firstName: regData.firstName.trim(),
-      middleName: (regData.middleName || '').trim(),
-      lastName: regData.lastName.trim(),
-      suffix: (regData.suffix || '').trim(),
-      birthdate: regData.birthdate,
-      sex: regData.sex || 'Male',
-      civilStatus: regData.civilStatus || 'Single',
-      purok: regData.purok,
-      address: `${regData.purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
-      contact,
-      email: (regData.email || '').trim(),
-      residentSince: regData.residentSince,
-      verified: false,
-      status: 'pending_approval',
-      registeredBy: null,
-      registrationChannel: 'Online Pre-Registration',
-      notes: regData.notes || 'Nagsumite ng pre-registration online. Naghihintay ng beripikasyon at pag-apruba ng Kalihim.',
-      createdAt: new Date().toISOString(),
-    };
-    data().residents.unshift(newRes);
-    save();
-    log({ short: fullName(newRes), role: 'resident' }, 'New resident pre-registered online (Awaiting Secretary approval)', id);
-    return newRes;
-  }
-
-  // Secretary directly encodes and officially registers a resident (Instantly active login)
-  function registerResidentBySecretary(regData, secretaryUser) {
-    const { username, contact } = validateResidentRegistration(regData, false);
-    const id = uid('res');
-    const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
-    const newRes = {
-      id,
-      username,
-      password: regData.password,
-      firstName: regData.firstName.trim(),
-      middleName: (regData.middleName || '').trim(),
-      lastName: regData.lastName.trim(),
-      suffix: (regData.suffix || '').trim(),
-      birthdate: regData.birthdate,
-      sex: regData.sex || 'Male',
-      civilStatus: regData.civilStatus || 'Single',
-      purok: regData.purok,
-      address: `${regData.purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
-      contact,
-      email: (regData.email || '').trim(),
-      residentSince: regData.residentSince,
-      verified: true,
-      status: 'active',
-      registeredBy: secName,
-      registrationChannel: 'Official Secretary Registration',
-      notes: 'Direktang ipinatala at inaprubahan sa Tanggapan ng Kalihim ng Barangay.',
-      createdAt: new Date().toISOString(),
-      approvedAt: new Date().toISOString(),
-    };
-    data().residents.unshift(newRes);
-    save();
-    log(secretaryUser || { short: secName, role: 'secretary' }, `Secretary officially registered resident ${fullName(newRes)} in Barangay Wawa Registry`, id);
-    return newRes;
-  }
-
-  // Secretary approves pending resident pre-registration (Unlocks resident login)
-  function approveResidentBySecretary(residentId, secretaryUser) {
-    const r = data().residents.find((x) => x.id === residentId);
-    if (!r) return null;
-    const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
-    r.verified = true;
-    r.status = 'active';
-    r.registeredBy = secName;
-    r.approvedAt = new Date().toISOString();
-    save();
-    log(secretaryUser || { short: secName, role: 'secretary' }, `Secretary approved resident registration for ${fullName(r)} (Login activated)`, r.id);
-    return r;
-  }
-
-  // Secretary rejects resident registration (e.g., non-resident)
-  function rejectResidentBySecretary(residentId, reason, secretaryUser) {
-    const r = data().residents.find((x) => x.id === residentId);
-    if (!r) return null;
-    const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
-    r.verified = false;
-    r.status = 'rejected';
-    r.remarks = reason || 'Hindi natukoy na lehitimong naninirahan sa Barangay Wawa.';
-    r.rejectedBy = secName;
-    r.rejectedAt = new Date().toISOString();
-    save();
-    log(secretaryUser || { short: secName, role: 'secretary' }, `Secretary rejected resident registration for ${fullName(r)}: ${r.remarks}`, r.id);
-    return r;
-  }
-
-  // Backward compatibility
+  const registerResidentOnline = (...args) => window.BDRMSCloud.registerResidentOnline(...args);
+  const registerResidentBySecretary = (...args) => window.BDRMSCloud.registerResidentBySecretary(...args);
+  const approveResidentBySecretary = (...args) => window.BDRMSCloud.setResidentStatus(args[0], 'active');
+  const rejectResidentBySecretary = (...args) => window.BDRMSCloud.setResidentStatus(args[0], 'rejected', args[1]);
   const registerResident = registerResidentOnline;
 
   /* ---------- CSV Export Function for Barangay Secretary / DILG ---------- */
@@ -768,9 +409,11 @@ const BDRMS = (() => {
         <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-ok>${esc(confirmText)}</button>`,
       onMount: (dialog, close) => {
         dialog.querySelector('[data-close]').focus();
-        dialog.querySelector('[data-ok]').addEventListener('click', () => {
-          close();
-          onConfirm();
+        dialog.querySelector('[data-ok]').addEventListener('click', async (event) => {
+          event.currentTarget.disabled = true;
+          try { await onConfirm(); close(); }
+          catch (error) { toast(error.message, 'error'); }
+          finally { if (dialog.isConnected) dialog.querySelector('[data-ok]').disabled = false; }
         });
       },
     });
@@ -852,7 +495,7 @@ const BDRMS = (() => {
 
   return {
     ICONS, DOC_TYPES, STATUSES, FLOW, ROLES, ID_TYPES, PUROKS, RESIDENCY_MONTHS,
-    data, load, save, reset, uid, esc, fmtDate, fmtDateLong, fmtDateTime, timeAgo, monthsBetween, residencyText, ageOf,
+    data, load, replaceData, save, reset, uid, genRef, esc, fmtDate, fmtDateLong, fmtDateTime, timeAgo, monthsBetween, residencyText, ageOf,
     fullName, maskName, maskPhone, maskEmail, findResidentMatch, createRequest, trackRequest, log,
     deviceRefs, addDeviceRef,
     login, currentUser, logout, can, isSecretary, isAdmin,

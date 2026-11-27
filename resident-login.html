@@ -46,8 +46,8 @@
         <p class="auth-note" id="applyNotice" hidden></p>
         <form method="post" class="auth-form" id="residentLoginForm">
           <div class="field">
-            <label for="resIdentifier">Username o mobile number</label>
-            <input type="text" id="resIdentifier" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
+            <label for="resIdentifier">Email address</label>
+            <input type="email" id="resIdentifier" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
           </div>
           <div class="field">
             <label for="resPassword">Password</label>
@@ -59,6 +59,7 @@
           <p class="auth-feedback" role="alert" hidden></p>
           <button type="submit" class="btn auth-submit">Mag-login</button>
         </form>
+
       </div>
 
       <div id="paneRegister" hidden>
@@ -114,16 +115,16 @@
             <input type="tel" id="regContact" name="contact" class="input" placeholder="09XX XXX XXXX" required autocomplete="tel">
           </div>
           <div class="field">
-            <label for="regUsername">Username</label>
-            <input type="text" id="regUsername" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
+            <label for="regUsername">Email address</label>
+            <input type="email" id="regUsername" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
           </div>
           <div class="field span-2">
             <label for="regPassword">Password</label>
             <div class="auth-password">
-              <input type="password" id="regPassword" name="password" class="input" minlength="6" required autocomplete="new-password" aria-describedby="regPasswordHint">
+              <input type="password" id="regPassword" name="password" class="input" minlength="8" required autocomplete="new-password" aria-describedby="regPasswordHint">
               <button type="button" class="auth-password-toggle" data-password-toggle aria-controls="regPassword" aria-pressed="false" aria-label="Ipakita ang password"></button>
             </div>
-            <span class="hint" id="regPasswordHint">Hindi bababa sa 6 na karakter.</span>
+            <span class="hint" id="regPasswordHint">Hindi bababa sa 8 na karakter.</span>
           </div>
           <p class="auth-feedback span-2" role="alert" hidden></p>
           <button type="submit" class="btn auth-submit span-2">Isumite ang pagpapatala</button>
@@ -131,11 +132,13 @@
       </div>
 
       <nav class="auth-other" aria-label="Iba pang portal">
-        <a href="secretary-login.html">Portal ng Kalihim</a>
+        <a href="staff-login.html">Admin at Staff Login</a>
       </nav>
     </section>
   </main>
+  <script src="/js/supabase-config.js"></script>
   <script src="/js/store.js"></script>
+  <script src="/js/cloud.js"></script>
   <script src="/js/auth.js"></script>
 </body>
 </html>

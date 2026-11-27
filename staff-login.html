@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barangay Staff Login | Barangay Wawa</title>
+  <meta name="description" content="Isang login para sa administrator at awtorisadong barangay staff.">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/auth.css">
+</head>
+<body class="auth-page">
+  <header class="auth-topbar">
+    <div class="container auth-topbar-inner">
+      <a href="index.html" class="brand">
+        <span class="auth-brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6M12 2v3"/></svg></span>
+        <span class="brand-text">
+          <strong>Barangay Wawa</strong>
+          <span>E-Services</span>
+        </span>
+      </a>
+      <a href="index.html" class="auth-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg><span>Bumalik sa website</span></a>
+    </div>
+  </header>
+
+  <main class="container auth-layout">
+    <div class="auth-visual" aria-hidden="true">
+      <img src="/assets/hero.jpg" alt="" width="1376" height="768">
+      <div class="auth-visual-caption">
+        <strong>Barangay Wawa</strong>
+        <span>Abra de Ilog, Occidental Mindoro</span>
+      </div>
+    </div>
+
+    <section class="auth-panel" aria-labelledby="authTitle">
+      <header class="auth-heading">
+        <h1 id="authTitle">Barangay Staff Login</h1>
+        <p>Para sa administrator, kalihim at awtorisadong barangay staff.</p>
+      </header>
+
+      <form method="post" class="auth-form" data-staff-role="staff">
+        <div class="field">
+          <label for="username">Email address</label>
+          <input type="email" id="username" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="auth-password">
+            <input type="password" id="password" name="password" class="input" required autocomplete="current-password">
+            <button type="button" class="auth-password-toggle" data-password-toggle aria-controls="password" aria-pressed="false" aria-label="Ipakita ang password"></button>
+          </div>
+        </div>
+        <p class="auth-feedback" role="alert" hidden></p>
+        <button type="submit" class="btn auth-submit">Mag-login</button>
+      </form>
+
+      <nav class="auth-other" aria-label="Iba pang portal">
+        <a href="secretary-login.html">Portal ng Kalihim</a>
+      </nav>
+    </section>
+  </main>
+  <script src="/js/supabase-config.js"></script>
+  <script src="/js/store.js"></script>
+  <script src="/js/cloud.js"></script>
+  <script src="/js/auth.js"></script>
+</body>
+</html>

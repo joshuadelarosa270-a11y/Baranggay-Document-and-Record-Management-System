@@ -147,7 +147,7 @@ const BDRMSUI = (() => {
         const form = dialog.querySelector('form');
         const input = form.elements.value;
         input.addEventListener('input', () => input.setCustomValidity(''));
-        form.addEventListener('submit', event => {
+        form.addEventListener('submit', async event => {
           event.preventDefault();
           const value = input.value.trim();
           if (!value) {
@@ -155,8 +155,12 @@ const BDRMSUI = (() => {
             input.reportValidity();
             return;
           }
-          close();
-          onSubmit(value);
+          const button = dialog.querySelector('[type="submit"]');
+          if (button.disabled) return;
+          button.disabled = true;
+          try { const result = await onSubmit(value); if (result !== false) close(); }
+          catch (error) { BDRMS.toast(error.message, 'error'); }
+          finally { if (dialog.isConnected) button.disabled = false; }
         });
       },
     });
