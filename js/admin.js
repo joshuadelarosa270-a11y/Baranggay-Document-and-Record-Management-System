@@ -6,21 +6,24 @@
 
 let currentAdmin = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try { await BDRMS.ready; } catch (error) { BDRMS.reportError(error); return; }
   const app = document.querySelector('.admin-app');
   const user = BDRMS.currentUser();
   if (!BDRMS.isAdmin(user)) {
-    window.location.replace('admin-login.html');
+    window.location.replace('staff-login.html');
     return;
   }
   currentAdmin = user;
+  const accountName = document.querySelector('.user-info strong');
+  if (accountName) accountName.textContent = user.name;
   initAdminUI(app);
   app.classList.remove('hidden');
 
   window.addEventListener('pageshow', () => {
     if (!BDRMS.isAdmin()) {
       app.classList.add('hidden');
-      window.location.replace('admin-login.html');
+      window.location.replace('staff-login.html');
     }
   });
 });
@@ -60,9 +63,9 @@ function setupLogout() {
         confirmText: 'Oo, Mag-logout',
         cancelText: 'Kanselahin',
         danger: true,
-        onConfirm: () => {
-          BDRMS.logout('Administrator logged out');
-          window.location.replace('admin-login.html');
+        onConfirm: async () => {
+          await BDRMS.logout();
+          window.location.replace('staff-login.html');
         }
       });
     });
@@ -176,24 +179,6 @@ function setupEventListeners() {
     });
   }
 
-  // Reset database
-  const btnReset = document.getElementById('btnResetData');
-  if (btnReset) {
-    btnReset.addEventListener('click', () => {
-      BDRMS.confirmDialog({
-        title: 'I-reset ang Sistema sa Default',
-        message: 'Nais mo bang ibalik ang lahat ng talaan ng Barangay Wawa sa orihinal nitong estado? Mawawala ang mga binagong transaksyon sa demo.',
-        confirmText: 'Oo, I-reset ang Datos',
-        cancelText: 'Kanselahin',
-        danger: true,
-        onConfirm: () => {
-          BDRMS.reset();
-          BDRMS.toast('Matagumpay na naibalik ang database sa default.', 'success');
-          setTimeout(() => location.reload(), 400);
-        }
-      });
-    });
-  }
 }
 
 /* ---------- Requests Table (Executive Monitoring View) ---------- */

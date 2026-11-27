@@ -16,35 +16,26 @@ function setPasswordVisibility(button, visible) {
 
 function prepareLoginForm(form) {
   form.addEventListener('input', () => showFeedback(form));
-  document.querySelectorAll('[data-demo-id]').forEach((button) => {
-    button.addEventListener('click', () => {
-      form.elements.username.value = button.dataset.demoId;
-      form.elements.password.value = button.dataset.demoPassword;
-      setPasswordVisibility(form.querySelector('[data-password-toggle]'), false);
-      showFeedback(form);
-      button.closest('details').open = false;
-      form.querySelector('[type="submit"]').focus();
-    });
-  });
 }
-
+async function submitToCloud(form, action) {
+  const button = form.querySelector('[type="submit"]');
+  if (button.disabled) return;
+  button.disabled = true;
+  showFeedback(form);
+  try { await action(); }
+  catch (error) { showFeedback(form, error.message); }
+  finally { button.disabled = false; }
+}
 function initStaffLogin(form) {
-  const role = form.dataset.staffRole;
-  const dashboard = role + '.html';
-  if (BDRMS.currentUser()?.role === role) {
-    window.location.replace(dashboard);
-    return;
-  }
-
+  const account = BDRMS.currentUser();
+  if (account) { window.location.replace(account.role === 'admin' ? 'admin.html' : 'secretary.html'); return; }
   prepareLoginForm(form);
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', event => {
     event.preventDefault();
-    const user = BDRMS.login(form.elements.username.value, form.elements.password.value, role);
-    if (user) {
-      window.location.replace(dashboard);
-    } else {
-      showFeedback(form, 'Pakisuri ang username at password para sa portal na ito.');
-    }
+    submitToCloud(form, async () => {
+      const account = await BDRMS.login(form.elements.username.value, form.elements.password.value);
+      window.location.replace(account.role === 'admin' ? 'admin.html' : 'secretary.html');
+    });
   });
 }
 
@@ -67,12 +58,14 @@ function initResidentLogin(form) {
   prepareLoginForm(form);
   form.addEventListener('submit', (event) => {
     event.preventDefault();
-    const result = BDRMS.loginResident(form.elements.username.value, form.elements.password.value);
+    submitToCloud(form, async () => {
+    const result = await BDRMS.loginResident(form.elements.username.value, form.elements.password.value);
     if (result.success) {
       window.location.replace(dashboard);
     } else {
       showFeedback(form, result.message, result.pending ? 'notice' : 'error');
     }
+    });
   });
 
   const loginButton = document.getElementById('tabLoginBtn');
@@ -114,9 +107,10 @@ function initResidentLogin(form) {
   registerForm.addEventListener('input', () => showFeedback(registerForm));
   registerForm.addEventListener('submit', (event) => {
     event.preventDefault();
+    submitToCloud(registerForm, async () => {
     let resident;
     try {
-      resident = BDRMS.registerResidentOnline(Object.fromEntries(new FormData(registerForm)));
+      resident = await BDRMS.registerResidentOnline(Object.fromEntries(new FormData(registerForm)));
     } catch (error) {
       showFeedback(registerForm, error.message);
       return;
@@ -129,11 +123,13 @@ function initResidentLogin(form) {
     form.elements.password.value = '';
     setPasswordVisibility(form.querySelector('[data-password-toggle]'), false);
     form.elements.username.focus();
-    showFeedback(form, 'Naisumite ang pagpapatala. Maghintay ng pag-apruba ng Kalihim bago mag-login.', 'success');
+    showFeedback(form, 'Naisumite ang pagpapatala. Tingnan ang email para sa confirmation link, at hintayin ang pag-apruba ng barangay staff.', 'success');
+    });
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try { await BDRMS.ready; } catch (error) { BDRMS.reportError(error); return; }
   document.querySelectorAll('[data-password-toggle]').forEach((button) => {
     setPasswordVisibility(button, false);
     button.addEventListener('click', () => setPasswordVisibility(button, button.getAttribute('aria-pressed') !== 'true'));

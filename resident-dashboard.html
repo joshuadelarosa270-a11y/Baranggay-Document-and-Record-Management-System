@@ -76,10 +76,13 @@
     </section>
   </main>
 
+  <script src="/js/supabase-config.js"></script>
   <script src="/js/store.js"></script>
+  <script src="/js/cloud.js"></script>
   <script src="/js/ui.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+  try { await BDRMS.ready; } catch (error) { BDRMS.reportError(error); return; }
       const requestedDoc = new URLSearchParams(window.location.search).get('apply');
       const applyDocKey = Object.hasOwn(BDRMS.DOC_TYPES, requestedDoc) ? requestedDoc : '';
       const loginURL = applyDocKey ? 'resident-login.html?from=apply&doc=' + encodeURIComponent(applyDocKey) : 'resident-login.html';
@@ -132,8 +135,8 @@
           title: 'Mag-logout?',
           message: 'Kailangan mong mag-login muli para makita ang iyong mga request.',
           confirmText: 'Mag-logout',
-          onConfirm: () => {
-            BDRMS.logoutResident();
+          onConfirm: async () => {
+            await BDRMS.logoutResident();
             window.location.replace('resident-login.html');
           },
         });
@@ -276,7 +279,7 @@
           }
           type.addEventListener('change', updateDocument);
           updateDocument();
-          form.addEventListener('submit', event => {
+          form.addEventListener('submit', async event => {
             event.preventDefault();
             const docType = type.value;
             const purpose = modalEl.querySelector('#qaPurpose').value.trim();
@@ -304,7 +307,8 @@
               residentSince: resident.residentSince,
             };
 
-            const req = BDRMS.createRequest({
+            try {
+            const req = await BDRMS.createRequest({
               applicant,
               docType,
               purpose,
@@ -323,6 +327,7 @@
             document.getElementById('residentStatusFilter').value = 'all';
             BDRMSUI.resetPage('residentPager');
             renderResidentRequests(resident);
+            } catch (error) { BDRMS.toast(error.message, 'error'); }
           });
         },
       });

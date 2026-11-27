@@ -1,299 +1,51 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="tl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barangay Wawa — E-Services, Document & Records Management System</title>
-  <meta name="description" content="Opisyal na Online Document Request at Records Management System ng Barangay Wawa, Abra de Ilog, Occidental Mindoro. Mabilis, ligtas, at maaasahan para sa lahat ng residente.">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Barangay Wawa | E-Services</title>
+  <meta name="description" content="Kilalanin ang online document request at records services ng Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
   <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="/css/print.css">
   <link rel="stylesheet" href="/css/public.css">
 </head>
 <body>
-
-  <!-- Top Sticky Navigation Bar -->
-  <header class="nav" id="topNav">
-    <div class="container nav-inner">
-      <a href="index.html" class="brand">
-        <div class="seal">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;max-width:24px;max-height:24px;">
-            <path d="M3 21h18"/><path d="M5 21V10l7-5 7 5v11"/><path d="M9 21v-6h6v6"/><path d="M12 2v3"/>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <strong>Barangay Wawa</strong>
-          <span>Abra de Ilog, Occidental Mindoro</span>
-        </div>
-      </a>
-
-      <!-- Desktop & Mobile Navigation Links -->
-      <nav class="nav-links" id="navLinks">
-        <a href="#services">Dokumento</a>
-        <a href="#process">Paano Mag-apply</a>
-        <a href="#track">I-track</a>
-        <a href="#directory">Direktoryo</a>
-        <a href="#hybrid">Walk-in</a>
-        <a href="secretary-login.html" class="mobile-portal-link">Portal ng Kalihim</a>
-      </nav>
-
-      <!-- Navigation CTAs -->
-      <div class="nav-cta">
-        <a href="resident-login.html" class="btn btn-primary btn-sm" id="navResidentBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-          <span id="navResidentText">Resident Portal</span>
-        </a>
-        <a href="secretary-login.html" class="btn btn-ghost btn-sm" title="Tanggapan ng Kalihim ng Barangay Wawa">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m21 17-2.16-1.44a2 2 0 0 0-2.48.22L15 17l-1.5-1.5L12 17"/><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.76-2-2-2-1.67 0-3 2-3 4.5S6 13 7 15c1 2 3 4 3 4"/>
-          </svg>
-          Portal ng Kalihim
-        </a>
-        <button class="icon-btn menu-toggle" id="menuToggle" aria-label="Menu" aria-controls="navLinks" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 6h16M4 12h16M4 18h16"/>
-          </svg>
-        </button>
-      </div>
+  <header class="overview-header">
+    <div class="container overview-nav">
+      <a class="brand" href="/"><span class="seal" aria-hidden="true">W</span><span class="brand-text"><strong>Barangay Wawa</strong><span>Abra de Ilog, Occidental Mindoro</span></span></a>
+      <nav aria-label="Mga portal"><a class="btn btn-ghost btn-sm" href="/staff-login.html">Staff Login</a><a class="btn btn-primary btn-sm" href="/resident-login.html">Resident Login</a></nav>
     </div>
   </header>
-
-  <section class="hero" aria-labelledby="heroTitle">
-    <div class="container hero-layout">
-      <div class="hero-content">
-        <p class="hero-location">Wawa, Abra de Ilog &middot; Occidental Mindoro</p>
-        <h1 id="heroTitle">Mga dokumento ng barangay, online</h1>
-        <p class="lead">Mag-request ng barangay clearance, certificate of residency, at iba pang dokumento. Gamitin ang reference number para subaybayan ang iyong aplikasyon.</p>
-
-        <div class="hero-actions">
-          <a href="resident-login.html" class="btn btn-primary">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>
-            </svg>
-            Mag-request
-          </a>
-          <a href="#track" class="btn btn-ghost">
-            I-track ang status
-          </a>
-        </div>
-
-        <div class="hero-search">
-          <label class="sr-only" for="heroSearchInput">Maghanap ng dokumento</label>
-          <div class="hero-search-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input type="search" id="heroSearchInput" placeholder="Maghanap ng dokumento">
-            <button type="button" class="btn btn-ghost btn-sm" id="heroSearchBtn">Hanapin</button>
-          </div>
-          <div class="hero-search-tags" aria-label="Mga mabilisang hanap">
-            <button type="button" class="hero-tag-btn" data-search="clearance">Clearance</button>
-            <button type="button" class="hero-tag-btn" data-search="indigency">Indigency</button>
-            <button type="button" class="hero-tag-btn" data-search="jobseeker">Jobseeker</button>
-            <button type="button" class="hero-tag-btn" data-search="residency">Residency</button>
-          </div>
-        </div>
+  <main>
+    <section class="container overview-hero" aria-labelledby="overviewTitle">
+      <div>
+        <p class="overview-eyebrow">BARANGAY WAWA E-SERVICES</p>
+        <h1 id="overviewTitle">Mas madaling mag-request.<br>Mas malinaw ang proseso.</h1>
+        <p class="overview-lead">Isang online na paraan para magpatala, magsumite ng document request, at subaybayan ang katayuan nito sa barangay.</p>
+        <div class="overview-actions"><a href="/resident-login.html#register" class="btn btn-primary">Magpatala bilang residente</a><a href="#serbisyo" class="btn btn-ghost">Tingnan ang mga serbisyo</a></div>
       </div>
-      <img class="hero-photo" src="/assets/hero.jpg" width="1376" height="768" alt="Ilustrasyon ng Barangay Hall sa baybayin">
-    </div>
-  </section>
-
-  <!-- Main Content Wrapper -->
-  <main class="main-content">
-
-    <!-- Document Catalogue Section -->
-    <section id="services" class="block">
-      <div class="container">
-
-        <div class="public-section-head">
-          <div>
-            <h2>Mga dokumento</h2>
-            <p>Piliin ang dokumento para makita ang requirements at bayad.</p>
-          </div>
-          <a href="resident-login.html#register" class="btn btn-ghost btn-sm">Magpatala</a>
-        </div>
-        <div class="service-filters" role="group" aria-label="Salain ang mga dokumento">
-          <button type="button" class="filter-tab active" data-category="all" aria-pressed="true">Lahat</button>
-          <button type="button" class="filter-tab" data-category="free" aria-pressed="false">Libre</button>
-          <button type="button" class="filter-tab" data-category="employment" aria-pressed="false">Trabaho</button>
-          <button type="button" class="filter-tab" data-category="assistance" aria-pressed="false">Ayuda</button>
-          <button type="button" class="filter-tab" data-category="business" aria-pressed="false">Negosyo</button>
-        </div>
-        <p class="public-search-state" id="docsSearchState" hidden>
-          <span id="docsSearchLabel"></span>
-          <button type="button" class="btn btn-ghost btn-sm" id="clearDocsSearch">I-clear</button>
-        </p>
-        <!-- Dynamic Grid of Documents -->
-        <div class="docs-grid" id="docsContainer">
-          <!-- Rendered dynamically by js/portal.js -->
-        </div>
-        <div class="list-pagination" id="docsPager" role="navigation" aria-label="Mga pahina ng dokumento" hidden>
-          <span data-page-range aria-live="polite"></span>
-          <div class="page-controls" data-page-controls>
-            <button type="button" class="btn btn-ghost btn-sm" data-page-step="-1" aria-label="Nakaraang pahina">&lsaquo;</button>
-            <span data-page-position></span>
-            <button type="button" class="btn btn-ghost btn-sm" data-page-step="1" aria-label="Susunod na pahina">&rsaquo;</button>
-          </div>
-        </div>
-      </div>
+      <img src="/assets/hero.jpg" width="1376" height="768" alt="Ilustrasyon ng barangay hall" fetchpriority="high">
     </section>
-
-    <section id="process" class="block">
-      <div class="container">
-        <div class="public-section-head"><h2>Paano kumuha ng dokumento</h2></div>
-        <ol class="public-steps">
-          <li><strong>Mag-login</strong><p>Magpatala muna kung wala ka pang account. Hihintayin ang pag-apruba ng Kalihim.</p></li>
-          <li><strong>Magsumite ng request</strong><p>Piliin ang dokumento at ilagay ang layunin at valid ID.</p></li>
-          <li><strong>I-track ang request</strong><p>Gamitin ang reference number at apelyido habang sinusuri ng Kalihim.</p></li>
-          <li><strong>Kunin sa barangay hall</strong><p>Dalhin ang valid ID at reference number kapag handa na ang dokumento.</p></li>
-        </ol>
-        <div id="request" class="public-register-row">
-          <p>Para sa mga naaprubahang residente ng Barangay Wawa ang online request.</p>
-          <a href="resident-login.html" class="btn btn-primary btn-sm">Buksan ang Resident Portal</a>
-        </div>
-      </div>
+    <section id="serbisyo" class="container overview-section" aria-labelledby="servicesTitle">
+      <p class="overview-eyebrow">MGA SERBISYO</p>
+      <h2 id="servicesTitle">Mga dokumentong maaaring i-request</h2>
+      <p class="muted">Susuriin ng barangay staff ang requirements at eligibility ng bawat aplikasyon.</p>
+      <ul class="overview-documents">
+        <li>Barangay Clearance</li><li>Certificate of Residency</li><li>Barangay Indigency</li>
+        <li>First Time Job Seeker Certificate</li><li>Barangay ID</li>
+        <li>Certificate for Bilihan</li><li>Certificate to File Action</li>
+      </ul>
     </section>
-
-    <!-- Live Request Status Tracking Section -->
-    <section id="track" class="block" style="background: #ffffff; border-top: 1px solid var(--border);">
-      <div class="container">
-        <div class="public-section-head">
-          <div><h2>I-track ang request</h2><p>Ilagay ang reference number at apelyido ng aplikante.</p></div>
-        </div>
-
-        <div class="track-wrap">
-          <div class="card">
-            <form class="track-form" id="trackingForm">
-              <div class="field">
-                <label for="trackRef">Reference Number <span class="req">*</span></label>
-                <input type="text" id="trackRef" class="input mono" placeholder="hal. BW-2610-K7QM" required autocomplete="off">
-              </div>
-              <div class="field">
-                <label for="trackLastName">Apelyido <span class="req">*</span></label>
-                <input type="text" id="trackLastName" class="input" placeholder="hal. Reyes" required autocomplete="family-name">
-              </div>
-              <div>
-                <button class="btn btn-primary btn-block" id="btnTrack" type="submit">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                  I-track
-                </button>
-              </div>
-            </form>
-
-            <details class="tracker-disclosure">
-              <summary>Subukan ang demo tracking</summary>
-              <div class="quick-ref-chips">
-                <button type="button" class="quick-ref-chip" data-ref="BW-2610-K7QM" data-lastname="Reyes">BW-2610-K7QM</button>
-                <button type="button" class="quick-ref-chip" data-ref="BW-2610-H8ZT" data-lastname="Villanueva">BW-2610-H8ZT</button>
-                <button type="button" class="quick-ref-chip" data-ref="BW-2610-F9VB" data-lastname="Castillo">BW-2610-F9VB</button>
-              </div>
-            </details>
-            <details class="tracker-disclosure">
-              <summary>Kamakailang hinanap sa device na ito</summary>
-              <div class="device-list" id="deviceRefsList"></div>
-            </details>
-          </div>
-
-          <!-- Tracking Result Output Box -->
-          <div class="track-result hidden" id="trackResult" aria-live="polite">
-            <!-- Rendered dynamically by lookupRequest() -->
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Barangay Leadership & Emergency Directory Section -->
-    <section id="directory" class="block" style="border-top: 1px solid var(--border);">
-      <div class="container">
-        <div class="public-section-head"><h2>Direktoryo at hotlines</h2></div>
-
-        <div class="directory-grid">
-          <div class="dir-card">
-            <div class="dir-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-              </svg>
-            </div>
-            <div class="dir-info">
-              <h4>Hon. Punong Barangay</h4>
-              <span>Tanggapan ng Kapitan • Executive Administration</span>
-              <b>Barangay Hall, Wawa</b>
-            </div>
-          </div>
-
-          <div class="dir-card">
-            <div class="dir-icon" style="background:var(--accent-soft); color:var(--accent);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/>
-              </svg>
-            </div>
-            <div class="dir-info">
-              <h4>Sec. Lorna P. Fernandez</h4>
-              <span>Kalihim ng Barangay • Tagapag-ingat ng Talaan</span>
-              <b>(043) 288-7100 / Rekord at Pag-apruba</b>
-            </div>
-          </div>
-
-          <div class="dir-card">
-            <div class="dir-icon" style="background:var(--gold-soft); color:var(--gold);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <div class="dir-info">
-              <h4>Barangay Tanod Patrol Desk</h4>
-              <span>24/7 Security & Peacekeeping Assistance</span>
-              <b>Hotline: 0917-888-WAWA (9292)</b>
-            </div>
-          </div>
-
-          <div class="dir-card">
-            <div class="dir-icon" style="background:var(--info-soft); color:var(--info);">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-              </svg>
-            </div>
-            <div class="dir-info">
-              <h4>Abra de Ilog Police Station</h4>
-              <span>Philippine National Police (PNP)</span>
-              <b>Hotline: 0998-598-6012</b>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section id="hybrid" class="block">
-      <div class="container public-section-head">
-        <div>
-          <h2>Walk-in sa barangay hall</h2>
-          <p>Dalhin ang valid ID at requirements. Lunes hanggang Biyernes, 8:00 AM–5:00 PM.</p>
-        </div>
-        <a href="#directory" class="btn btn-ghost btn-sm">Tingnan ang direktoryo</a>
-      </div>
+    <section class="container overview-section" aria-labelledby="stepsTitle">
+      <p class="overview-eyebrow">PAANO ITO GUMAGANA</p>
+      <h2 id="stepsTitle">Mula pagpapatala hanggang pagkuha</h2>
+      <ol class="overview-steps">
+        <li><span>01</span><h3>Magpatala</h3><p>Gumawa ng resident account at hintayin ang beripikasyon ng barangay staff.</p></li>
+        <li><span>02</span><h3>Mag-request</h3><p>Mag-login, piliin ang dokumento, at isumite ang kinakailangang impormasyon.</p></li>
+        <li><span>03</span><h3>Subaybayan at kunin</h3><p>Tingnan ang status sa iyong account. Kapag handa na, dalhin ang valid ID sa barangay hall.</p></li>
+      </ol>
     </section>
   </main>
-
-  <footer class="site-footer public-footer" id="proposal">
-    <div class="container public-footer-grid">
-      <div>
-        <strong>Barangay Wawa</strong>
-        <p>Abra de Ilog, Occidental Mindoro</p>
-      </div>
-      <div class="public-footer-links" aria-label="Mga link sa portal">
-        <a href="resident-login.html">Resident Portal</a>
-        <a href="secretary-login.html">Portal ng Kalihim</a>
-        <a href="admin-login.html">Admin Portal</a>
-        <button type="button" id="viewProposalBtn">Tungkol sa proyekto</button>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Scripts -->
-  <script src="/js/store.js"></script>
-  <script src="/js/ui.js"></script>
-  <script src="/js/portal.js"></script>
+  <footer class="overview-footer"><div class="container overview-nav"><span>Barangay Wawa · Abra de Ilog, Occidental Mindoro</span><a href="/staff-login.html">Barangay Staff Login</a></div></footer>
 </body>
 </html>
 

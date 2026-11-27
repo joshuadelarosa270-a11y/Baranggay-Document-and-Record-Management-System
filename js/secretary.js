@@ -7,21 +7,24 @@
 let currentSecretary = null;
 let activeResidentsSubtab = 'active';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  try { await BDRMS.ready; } catch (error) { BDRMS.reportError(error); return; }
   const app = document.querySelector('.admin-app');
   const user = BDRMS.currentUser();
   if (!BDRMS.isSecretary(user)) {
-    window.location.replace('secretary-login.html');
+    window.location.replace('staff-login.html');
     return;
   }
   currentSecretary = user;
+  const accountName = document.querySelector('.user-info strong');
+  if (accountName) accountName.textContent = user.name;
   initSecretaryUI(app);
   app.classList.remove('hidden');
 
   window.addEventListener('pageshow', () => {
     if (!BDRMS.isSecretary()) {
       app.classList.add('hidden');
-      window.location.replace('secretary-login.html');
+      window.location.replace('staff-login.html');
     }
   });
 });
@@ -54,9 +57,9 @@ function setupLogout() {
         confirmText: 'Oo, Mag-logout',
         cancelText: 'Kanselahin',
         danger: true,
-        onConfirm: () => {
-          BDRMS.logout('Secretary logged out');
-          window.location.replace('secretary-login.html');
+        onConfirm: async () => {
+          await BDRMS.logout();
+          window.location.replace('staff-login.html');
         }
       });
     });
@@ -362,7 +365,8 @@ function requestWorkflowAction(req, action, close) {
   handleSecretaryAction(req, action, close);
 }
 
-function handleSecretaryAction(req, action, closeModal, value) {
+async function handleSecretaryAction(req, action, closeModal, value) {
+  try {
   const user = currentSecretary;
   const now = new Date().toISOString();
 
@@ -372,9 +376,8 @@ function handleSecretaryAction(req, action, closeModal, value) {
     req.verification.identity = true;
     req.verification.residency = true;
     req.history.push({ status: 'Under Verification', by: user.short, at: now, note: 'Identity & residency verified against barangay database.' });
-    req.history.push({ status: 'For Approval', by: user.short, at: new Date(Date.now() + 1000).toISOString(), note: 'Verified by Secretary Lorna Fernandez and marked for approval.' });
+    req.history.push({ status: 'For Approval', by: user.short, at: new Date(Date.now() + 1000).toISOString(), note: 'Verified by barangay staff and marked for approval.' });
     BDRMS.log(user, `Verified and forwarded ${req.ref} for approval`);
-    BDRMS.toast(`Na-verify na! Ang ${req.ref} ay nai-forward para sa pinal na pag-apruba.`, 'success');
   } else if (action === 'verify') {
     req.status = 'Under Verification';
     req.verification = req.verification || {};
@@ -382,17 +385,14 @@ function handleSecretaryAction(req, action, closeModal, value) {
     req.verification.residency = true;
     req.history.push({ status: 'Under Verification', by: user.short, at: now, note: 'Checking proof of dwelling or additional requirements.' });
     BDRMS.log(user, `Marked request ${req.ref} under verification`);
-    BDRMS.toast(`Inilagay ang ${req.ref} sa Under Verification.`, 'info');
   } else if (action === 'forward') {
     req.status = 'For Approval';
     req.history.push({ status: 'For Approval', by: user.short, at: now, note: 'Endorsed for final approval.' });
     BDRMS.log(user, `Forwarded ${req.ref} for approval`);
-    BDRMS.toast(`Nai-forward ang ${req.ref} para sa approval.`, 'info');
   } else if (action === 'approve') {
     req.status = 'Ready for Pickup';
-    req.history.push({ status: 'Ready for Pickup', by: user.short, at: now, note: 'Approved and finalized by Secretary Lorna P. Fernandez.' });
+    req.history.push({ status: 'Ready for Pickup', by: user.short, at: now, note: 'Approved and finalized by barangay staff.' });
     BDRMS.log(user, `Approved request ${req.ref}`);
-    BDRMS.toast(`Naaprubahan! Handa nang kunin ang dokumento ${req.ref}.`, 'success');
   } else if (action === 'release') {
     req.status = 'Released';
     req.orNumber = value || req.orNumber || 'FREE-RA11261';
@@ -400,7 +400,6 @@ function handleSecretaryAction(req, action, closeModal, value) {
     req.releasedAt = now;
     req.history.push({ status: 'Released', by: user.short, at: now, note: `Document issued and released. OR# ${req.orNumber}` });
     BDRMS.log(user, `Released document ${req.ref} with OR# ${req.orNumber}`);
-    BDRMS.toast(`Matagumpay na na-release ang dokumento! OR# ${req.orNumber}`, 'success');
   } else if (action === 'reject') {
     const reason = value;
 
@@ -408,13 +407,14 @@ function handleSecretaryAction(req, action, closeModal, value) {
     req.remarks = reason;
     req.history.push({ status: 'Rejected', by: user.short, at: now, note: `Rejected by Secretary: ${reason}` });
     BDRMS.log(user, `Rejected ${req.ref}: ${reason}`);
-    BDRMS.toast(`Minarkahang Rejected ang ${req.ref}.`, 'error');
   }
 
   req.updatedAt = now;
-  BDRMS.save();
+  await BDRMS.save();
   closeModal();
   renderDashboard();
+  BDRMS.toast('Naisave ang pagbabago sa cloud.');
+  } catch (error) { BDRMS.toast(error.message, 'error'); return false; }
 }
 
 window.printRequestDirect = function(reqId) {
@@ -493,7 +493,7 @@ function openWalkinModal() {
     foot,
   });
 
-  document.getElementById('formWalkinRequest').addEventListener('submit', event => {
+  document.getElementById('formWalkinRequest').addEventListener('submit', async event => {
     event.preventDefault();
     const resId = document.getElementById('walkinResidentId').value;
     const docType = document.getElementById('walkinDocType').value;
@@ -510,7 +510,7 @@ function openWalkinModal() {
 
     const newReq = {
       id: BDRMS.uid('req'),
-      ref: `BW-2603-${Math.floor(1000 + Math.random() * 9000)}`,
+      ref: BDRMS.genRef(),
       residentId: resident.id,
       docType,
       purpose,
@@ -536,7 +536,7 @@ function openWalkinModal() {
     };
 
     BDRMS.data().requests.unshift(newReq);
-    BDRMS.save();
+    try { await BDRMS.save(); } catch (error) { BDRMS.toast(error.message, 'error'); return; }
     BDRMS.log(currentSecretary, `Encoded walk-in request ${newReq.ref} for ${BDRMS.fullName(resident)}`);
     BDRMS.toast(`Matagumpay na nai-encode ang walk-in request: ${newReq.ref}`, 'success');
 
@@ -599,8 +599,8 @@ function reviewResident(resident) {
         title: 'Aprubahan ang pagpapatala',
         message: 'Kumpirmahing napatunayan ang paninirahan ni ' + BDRMS.fullName(resident) + ' sa Barangay Wawa.',
         confirmText: 'Aprubahan',
-        onConfirm: () => {
-          BDRMS.approveResidentBySecretary(resident.id, currentSecretary);
+        onConfirm: async () => {
+          await BDRMS.approveResidentBySecretary(resident.id, currentSecretary);
           closeDetails();
           renderDashboard();
           BDRMS.toast('Naaprubahan ang pagpapatala.', 'success');
@@ -614,8 +614,9 @@ function reviewResident(resident) {
         confirmText: 'Tanggihan',
         multiline: true,
         danger: true,
-        onSubmit: reason => {
-          BDRMS.rejectResidentBySecretary(resident.id, reason, currentSecretary);
+        onSubmit: async reason => {
+          try { await BDRMS.rejectResidentBySecretary(resident.id, reason, currentSecretary); }
+          catch (error) { BDRMS.toast(error.message, 'error'); return; }
           closeDetails();
           renderDashboard();
           BDRMS.toast('Naitala ang pagtanggi.');
@@ -677,16 +678,7 @@ function openAddResidentModal() {
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
-        <div class="field">
-          <label for="addUsername">Username</label>
-          <input type="text" id="addUsername" class="input" placeholder="hal. maria.delacruz" required>
-        </div>
-        <div class="field">
-          <label for="addPassword">Password</label>
-          <input type="password" id="addPassword" class="input" minlength="6" required autocomplete="new-password">
-        </div>
-      </div>
+<p class="muted">Resident record para sa walk-in services. Para sa online login, kailangang magpatala gamit ang sariling email.</p>
     </form>
   `;
 
@@ -702,7 +694,7 @@ function openAddResidentModal() {
     foot,
   });
 
-  document.getElementById('formAddResident').addEventListener('submit', (event) => {
+  document.getElementById('formAddResident').addEventListener('submit', async (event) => {
     event.preventDefault();
     const fn = document.getElementById('addFirstName').value.trim();
     const ln = document.getElementById('addLastName').value.trim();
@@ -711,8 +703,6 @@ function openAddResidentModal() {
     const contact = document.getElementById('addContact').value.trim();
     const residentSince = document.getElementById('addResidentSince').value;
     const idType = document.getElementById('addIdType').value;
-    const username = document.getElementById('addUsername').value.trim().toLowerCase();
-    const password = document.getElementById('addPassword').value;
 
     const regData = {
       firstName: fn,
@@ -723,18 +713,16 @@ function openAddResidentModal() {
       residentSince,
       idType,
       idNumber: 'VERIFIED-BY-SECRETARY',
-      username,
-      password,
     };
 
     try {
-      BDRMS.registerResidentBySecretary(regData, currentSecretary);
+      await BDRMS.registerResidentBySecretary(regData, currentSecretary);
     } catch (error) {
       BDRMS.toast(error.message, 'error');
       return;
     }
     close();
-    BDRMS.toast(`Matagumpay na nairehistro si ${fn} ${ln}! Aktibo na ang kanyang login sa Resident Portal.`, 'success');
+    BDRMS.toast(`Matagumpay na nairehistro si ${fn} ${ln}! Naisave na ang kanyang resident record sa cloud.`, 'success');
     renderDashboard();
   });
 }

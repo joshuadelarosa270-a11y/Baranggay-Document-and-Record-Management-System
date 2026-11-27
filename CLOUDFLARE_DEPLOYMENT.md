@@ -1,26 +1,57 @@
-# Barangay Wawa: Cloudflare and Supabase
+# Cloud-only Barangay Wawa deployment
 
-Status: Cloudflare build preparation and public Supabase configuration only.
-The existing app still uses local browser storage and demo logins. It is not yet
-connected to Supabase Auth or shared database records. Do not use real resident
-data until that integration and access-control verification are complete.
+Implemented: no demo accounts/seeded records, one staff login at /staff-login.html,
+role-based dashboards, Supabase Auth and database requests, and an overview-only
+landing page. No secret/service-role credential is included. Old browser records
+are ignored and preserved, not migrated.
 
-## Supabase project
+## Required database installation (not yet performed)
 
-- Project reference: `cfqivrhbuwxuqyjqyehx`
-- Project URL: `https://cfqivrhbuwxuqyjqyehx.supabase.co`
-- Public configuration: `js/supabase-config.js` (not yet consumed by the app)
-- No secret or service-role credential is stored in this repository.
+The connected Supabase account has no access to project cfqivrhbuwxuqyjqyehx.
+Reconnect using an account with project access, then inspect existing public
+tables before running supabase/setup.sql. This is a fresh-installation script:
+it stops on conflicting table/function names and must not be rerun blindly.
+It creates the staff, resident, request and audit tables, RLS policies,
+version-checked transaction RPC, registration and audit triggers.
+SQL execution and live RLS testing are pending.
 
-The connected Supabase account currently cannot access this project. Reconnect
-Supabase using an account with access to this project before schema inspection,
-database changes and Auth integration. Existing browser data is not migrated.
-Rotate/revoke the previously shared legacy service-role credential in Supabase.
-Creating a new publishable key alone does not revoke a legacy service-role key.
+## First administrator and staff accounts
 
-## Cloudflare Pages Git integration
+Create/invite each real staff user through Supabase Authentication using their
+own email. They set their own password through the normal Supabase flow.
+After the user exists, run the following in SQL Editor with the correct email
+and name. Confirm exactly one row was inserted.
 
-Connect the existing GitHub repository in Cloudflare Workers & Pages, then use:
+```sql
+insert into public.bdrms_staff (id, name, role)
+select id, 'YOUR STAFF NAME', 'admin'
+from auth.users where lower(email) = lower('YOUR STAFF EMAIL');
+```
+
+Use secretary or staff for operational staff. Admin is read-only monitoring.
+No browser client can grant staff access. Do not share passwords in SQL or chat.
+
+## Residents
+
+Enable email/password Auth and confirmation emails. Configure the Cloudflare URL
+in Supabase Auth URL Configuration. Resident profiles start pending; staff must
+approve them. Passwords go only to Supabase Auth, never to resident records.
+
+Staff can create walk-in registry records without passwords. They are registry
+records, not login accounts. Reconcile/link existing walk-in records before the
+same person registers online; automatic matching and migration are not included.
+
+## Validation before production
+
+Run node --test tests/cloud.test.cjs and node scripts/build-cloudflare.cjs.
+Tests mock HTTP; they do not verify live SQL or RLS.
+
+On the live project test all roles, pending/rejected residents, cross-resident
+access denial, approval/payment forgery denial, admin write denial, stale edits,
+request lifecycle, audit entries and shared records on two devices. Run Supabase
+security/performance advisors after installing the schema.
+
+## Cloudflare Pages
 
 | Setting | Value |
 | --- | --- |
@@ -29,27 +60,8 @@ Connect the existing GitHub repository in Cloudflare Workers & Pages, then use:
 | Build command | node scripts/build-cloudflare.cjs |
 | Build output directory | dist |
 
-These source changes must be pushed to GitHub before Cloudflare can build them.
-No deployment or Git push has been performed by this setup.
+Preview the branch first; merge after database installation and live verification.
+Only app assets go into dist. SQL, tests, documents and development files are
+excluded. The previously shared legacy service-role key must be revoked/rotated
+separately in Supabase API Keys.
 
-## Direct upload alternative
-
-Run `node scripts/build-cloudflare.cjs` in the project folder. Upload only the
-contents of `dist` through Cloudflare Pages direct upload. Do not upload the
-project root: it contains development files and presentation documents.
-Direct Upload projects cannot later switch to Git integration without creating
-a new Pages project.
-
-## Before production use
-
-1. Connect the correct Supabase account and inspect the existing schema.
-2. Implement Supabase Auth; remove browser password checks and demo credentials.
-3. Add database tables and row-level access for residents, secretary and admin.
-4. Connect registration, requests, approvals and logs to the database.
-5. Configure the deployed website URL in Supabase Auth URL Configuration.
-6. Verify access rules and shared records with different accounts and devices.
-
-Official references:
-- https://developers.cloudflare.com/pages/framework-guides/deploy-anything/
-- https://developers.cloudflare.com/pages/get-started/direct-upload/
-- https://supabase.com/docs/guides/getting-started/api-keys
