@@ -3,282 +3,149 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resident Portal — Mag-login at Magrehistro | Barangay Wawa</title>
-  <meta name="description" content="Resident login at account registration para sa mga mamamayan ng Barangay Wawa, Abra de Ilog, Occidental Mindoro.">
+  <title>Portal ng Residente | Barangay Wawa</title>
+  <meta name="description" content="Mag-login o magsumite ng paunang pagpapatala sa Barangay Wawa.">
   <link rel="stylesheet" href="/css/styles.css">
-  <style>
-    .auth-page { min-height:100vh; display:grid; place-items:center; padding:40px 20px; background:var(--bg); }
-    .auth-card { width:min(560px,100%); padding:36px; background:#ffffff; border:1px solid var(--border); border-radius:var(--radius-lg); box-shadow:var(--shadow-xl); }
-    .tab-toggles { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding:5px; border-radius:12px; background:#f1f5f9; border:1px solid var(--border); margin-bottom:24px; }
-    .tab-toggle-btn { padding:10px; border-radius:9px; font-size:0.9rem; font-weight:600; color:var(--text-soft); text-align:center; cursor:pointer; transition:all .2s var(--ease); }
-    .tab-toggle-btn.active { background:#ffffff; color:var(--primary); box-shadow:var(--shadow-sm); }
-    .demo-residents { margin-top:24px; padding-top:18px; border-top:1px dashed var(--border); }
-    .demo-residents > span { display:block; font-size:0.76rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px; font-weight:600; }
-    .demo-res-btn { display:flex; align-items:center; justify-content:space-between; width:100%; padding:10px 14px; border-radius:10px; background:#f8fafc; border:1px solid var(--border); font-size:0.84rem; margin-bottom:8px; cursor:pointer; transition:all .2s; text-align:left; }
-    .demo-res-btn:hover { border-color:var(--primary); background:var(--primary-soft); color:var(--primary-strong); }
-    .auth-context-banner { margin-bottom:18px; padding:12px 16px; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:10px; font-size:0.88rem; color:#065f46; display:flex; align-items:center; gap:10px; }
-    .auth-context-banner svg { flex-shrink:0; }
-    .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; }
-    .span-2 { grid-column:span 2; }
-    @media (max-width:480px) { .form-grid { grid-template-columns:1fr; } .span-2 { grid-column:span 1; } .auth-card { padding:24px 18px; } }
-  </style>
+  <link rel="stylesheet" href="/css/auth.css">
 </head>
 <body class="auth-page">
-  <div class="card auth-card" id="mainAuthCard">
-    <div style="text-align:center; margin-bottom:22px;">
-      <a href="index.html" style="display:inline-block; margin-bottom:12px;">
-        <div class="seal" style="margin:0 auto; width:52px; height:52px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-          </svg>
-        </div>
+  <header class="auth-topbar">
+    <div class="container auth-topbar-inner">
+      <a href="index.html" class="brand">
+        <span class="auth-brand-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6M12 2v3"/></svg></span>
+        <span class="brand-text">
+          <strong>Barangay Wawa</strong>
+          <span>E-Services</span>
+        </span>
       </a>
-      <h2 style="font-size:1.6rem; color:var(--text); margin-bottom:4px;">Barangay Resident Portal</h2>
-      <p class="muted" style="font-size:0.88rem;">Barangay Wawa, Abra de Ilog, Occidental Mindoro</p>
+      <a href="index.html" class="auth-back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m7 7-7-7 7-7"/></svg><span>Bumalik sa website</span></a>
     </div>
+  </header>
 
-    <div class="tab-toggles">
-      <button type="button" class="tab-toggle-btn active" id="tabLoginBtn">1. Mag-login (Sign In)</button>
-      <button type="button" class="tab-toggle-btn" id="tabRegisterBtn">2. Magpatala (Pre-Registration)</button>
-    </div>
-
-    <!-- Alert / Notice Box -->
-    <div style="background:#f8fafc; border:1px solid #cbd5e1; border-left:4px solid var(--primary); padding:12px 14px; border-radius:10px; margin-bottom:20px; font-size:0.84rem; color:var(--text-soft); line-height:1.5;">
-      <strong>Patakaran ng Barangay Wawa:</strong> Tanging ang mga lehitimong residente ng Barangay Wawa na opisyal nang nairehistro o naaprubahan ng <b>Kalihim ng Barangay (Secretary)</b> ang maaaring mag-login upang kumuha ng dokumento.
-    </div>
-
-    <div id="paneLogin">
-      <form id="residentLoginForm" style="display:grid; gap:16px;">
-        <div class="field">
-          <label for="resIdentifier">Numero ng Telepono o Username</label>
-          <input type="text" id="resIdentifier" class="input" placeholder="hal. 09171234561 o maria.reyes" required autocomplete="username">
-        </div>
-        <div class="field">
-          <label for="resPassword">Password</label>
-          <input type="password" id="resPassword" class="input" placeholder="Ilagay ang iyong password" required autocomplete="current-password">
-        </div>
-        <button type="submit" class="btn btn-primary btn-block btn-lg" id="btnResLoginSubmit" style="margin-top:6px;">
-          Pumasok sa Aking Resident Account
-        </button>
-      </form>
-      <div class="demo-residents">
-        <span>Subukan ang Demo Accounts (Pumili ng Residente):</span>
-        <button type="button" class="demo-res-btn" data-id="09171234561" data-pass="resident123">
-          <span><b>Maria Santos Reyes</b> (Purok 1 &bull; Inaprubahan ni Sec. Fernandez)</span>
-          <span style="color:var(--primary); font-size:0.78rem; font-weight:600;">Mag-login bilang Maria &rarr;</span>
-        </button>
-        <button type="button" class="demo-res-btn" data-id="09181234562" data-pass="resident123">
-          <span><b>Jose Garcia Mendoza Jr.</b> (Purok 2 &bull; Inaprubahan ni Sec. Fernandez)</span>
-          <span style="color:var(--primary); font-size:0.78rem; font-weight:600;">Mag-login bilang Jose &rarr;</span>
-        </button>
-        <button type="button" class="demo-res-btn" data-id="09191234563" data-pass="resident123">
-          <span><b>Ana Lopez Villanueva</b> (Purok 3 &bull; Inaprubahan ni Sec. Fernandez)</span>
-          <span style="color:var(--primary); font-size:0.78rem; font-weight:600;">Mag-login bilang Ana &rarr;</span>
-        </button>
-        <button type="button" class="demo-res-btn" data-id="09179998811" data-pass="resident123" style="background:#fffbeb; border-color:#fde68a;">
-          <span><b>Rica Mae Alcantara</b> (Purok 4 &bull; ⏳ Hinihintay pa ang Apruba ni Secretary)</span>
-          <span style="color:#d97706; font-size:0.78rem; font-weight:600;">Subukan ang Pending Login &rarr;</span>
-        </button>
+  <main class="container auth-layout">
+    <div class="auth-visual" aria-hidden="true">
+      <img src="/assets/hero.jpg" alt="" width="1376" height="768">
+      <div class="auth-visual-caption">
+        <strong>Barangay Wawa</strong>
+        <span>Abra de Ilog, Occidental Mindoro</span>
       </div>
     </div>
 
-    <div id="paneRegister" class="hidden">
-      <div style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px 14px; border-radius:10px; margin-bottom:16px; font-size:0.83rem; color:#1e40af; line-height:1.5;">
-        <b>Paunawa sa Pagpapatala:</b> Ang online form na ito ay paunang rehistrasyon lamang para sa mga naninirahan sa <b>Barangay Wawa (Purok 1 hanggang 7)</b>. Ang iyong talaan ay susuriin at <b>opisyal na aaprubahan muna ni Secretary Lorna Fernandez</b> bago ka makapag-login.
+    <section class="auth-panel" aria-labelledby="authTitle">
+      <header class="auth-heading">
+        <h1 id="authTitle">Portal ng Residente</h1>
+        <p>Mag-request at subaybayan ang iyong mga dokumento.</p>
+      </header>
+
+      <div class="auth-tabs" role="group" aria-label="Piliin ang gagawin">
+        <button type="button" id="tabLoginBtn" aria-controls="paneLogin" aria-pressed="true">Mag-login</button>
+        <button type="button" id="tabRegisterBtn" aria-controls="paneRegister" aria-pressed="false">Magpatala</button>
       </div>
-      <form id="residentRegisterForm" class="form-grid">
-        <div class="field">
-          <label for="regFirst">Unang Pangalan <span class="req">*</span></label>
-          <input type="text" id="regFirst" class="input" placeholder="hal. Elena" required>
-        </div>
-        <div class="field">
-          <label for="regLast">Apelyido <span class="req">*</span></label>
-          <input type="text" id="regLast" class="input" placeholder="hal. Delos Santos" required>
-        </div>
-        <div class="field">
-          <label for="regMiddle">Gitnang Pangalan</label>
-          <input type="text" id="regMiddle" class="input" placeholder="hal. Cruz (opsyonal)">
-        </div>
-        <div class="field">
-          <label for="regBirth">Araw ng Kapanganakan <span class="req">*</span></label>
-          <input type="date" id="regBirth" class="input" required>
-        </div>
-        <div class="field">
-          <label for="regSex">Kasarian <span class="req">*</span></label>
-          <select id="regSex" class="select" required>
-            <option value="Female">Babae (Female)</option>
-            <option value="Male">Lalaki (Male)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="regCivil">Katayuang Sibil <span class="req">*</span></label>
-          <select id="regCivil" class="select" required>
-            <option value="Single">Walang Asawa (Single)</option>
-            <option value="Married">May Asawa (Married)</option>
-            <option value="Widowed">Biyudo / Biyuda (Widowed)</option>
-            <option value="Separated">Hiwalay (Separated)</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="regPurok">Purok sa Brgy. Wawa <span class="req">*</span></label>
-          <select id="regPurok" class="select" required></select>
-        </div>
-        <div class="field">
-          <label for="regSince">Naninirahan sa Wawa Simula <span class="req">*</span></label>
-          <input type="date" id="regSince" class="input" required>
-        </div>
-        <div class="field span-2">
-          <div id="regResidencyMeter" class="residency-meter ok" style="margin-top:0;"></div>
-        </div>
-        <div class="field">
-          <label for="regContact">Mobile Number <span class="req">*</span></label>
-          <input type="tel" id="regContact" class="input" placeholder="09XX XXX XXXX" required>
-        </div>
-        <div class="field">
-          <label for="regUsername">Username <span class="req">*</span></label>
-          <input type="text" id="regUsername" class="input" placeholder="hal. elena.santos" required>
-        </div>
-        <div class="field span-2">
-          <label for="regPassword">Lumikha ng Password <span class="req">*</span></label>
-          <input type="password" id="regPassword" class="input" placeholder="Hindi bababa sa 6 na karakter" required>
-        </div>
-        <div class="span-2" style="margin-top:6px;">
-          <button type="submit" class="btn btn-primary btn-block btn-lg">
-            Isumite ang Impormasyon kay Secretary para sa Pag-apruba
-          </button>
-        </div>
-      </form>
-    </div>
 
-    <div style="margin-top:24px; padding-top:16px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-size:0.84rem;">
-      <a href="index.html" class="muted" style="text-decoration:underline;">&#8592; Bumalik sa Public Website</a>
-      <a href="secretary-login.html" style="color:var(--primary); font-weight:600;">Tanggapan ng Kalihim (Secretary Portal) &#8594;</a>
-    </div>
-  </div>
-
-  <script src="/js/store.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      var cur = BDRMS.currentResident();
-      if (cur) { window.location.href = 'resident-dashboard.html'; return; }
-
-      var params = new URLSearchParams(window.location.search);
-      var fromApply = params.get('from') === 'apply';
-      var docKey = params.get('doc');
-
-      if (fromApply) {
-        var docName = (BDRMS.DOC_TYPES[docKey] || {}).name || 'isang opisyal na dokumento';
-        var banner = document.createElement('div');
-        banner.className = 'auth-context-banner';
-        banner.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px;color:#059669;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg><span>Mag-login gamit ang iyong rehistradong resident account upang makapag-apply ng <strong>' + BDRMS.esc(docName) + '</strong>.</span>';
-        var card = document.getElementById('mainAuthCard');
-        card.insertBefore(banner, card.firstChild);
-      }
-
-      var tabLoginBtn = document.getElementById('tabLoginBtn');
-      var tabRegisterBtn = document.getElementById('tabRegisterBtn');
-      var paneLogin = document.getElementById('paneLogin');
-      var paneRegister = document.getElementById('paneRegister');
-
-      function showLogin() { tabLoginBtn.classList.add('active'); tabRegisterBtn.classList.remove('active'); paneLogin.classList.remove('hidden'); paneRegister.classList.add('hidden'); }
-      function showRegister() { tabRegisterBtn.classList.add('active'); tabLoginBtn.classList.remove('active'); paneRegister.classList.remove('hidden'); paneLogin.classList.add('hidden'); }
-
-      tabLoginBtn.addEventListener('click', showLogin);
-      tabRegisterBtn.addEventListener('click', showRegister);
-
-      if (window.location.hash === '#register') { showRegister(); }
-
-      var purokSel = document.getElementById('regPurok');
-      purokSel.innerHTML = BDRMS.PUROKS.map(function(p) { return '<option value="' + p + '">' + p + '</option>'; }).join('');
-
-      var sinceInp = document.getElementById('regSince');
-      var def = new Date(); def.setFullYear(def.getFullYear() - 1);
-      sinceInp.value = def.toISOString().slice(0, 10);
-
-      var meter = document.getElementById('regResidencyMeter');
-      function checkResidency() {
-        var val = sinceInp.value, months = BDRMS.monthsBetween(val), text = BDRMS.residencyText(val);
-        if (months >= 6) { meter.className = 'residency-meter ok'; meter.innerHTML = BDRMS.ICONS.check + ' <b>Paninirahan sa Wawa: ' + text + '</b> &mdash; Kuwalipikado (&ge; 6 na buwan).'; }
-        else { meter.className = 'residency-meter warn'; meter.innerHTML = BDRMS.ICONS.alert + ' <b>Paninirahan sa Wawa: ' + text + '</b> &mdash; Kulang sa 6 na buwan.'; }
-      }
-      sinceInp.addEventListener('change', checkResidency);
-      checkResidency();
-
-      document.querySelectorAll('.demo-res-btn').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          document.getElementById('resIdentifier').value = btn.getAttribute('data-id');
-          document.getElementById('resPassword').value = btn.getAttribute('data-pass');
-          document.getElementById('btnResLoginSubmit').focus();
-        });
-      });
-
-      function goAfterLogin() {
-        if (fromApply && docKey) { window.location.href = 'resident-dashboard.html?apply=' + docKey; }
-        else { window.location.href = 'resident-dashboard.html'; }
-      }
-
-      document.getElementById('residentLoginForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var id = document.getElementById('resIdentifier').value.trim();
-        var pass = document.getElementById('resPassword').value;
-        var res = BDRMS.loginResident(id, pass);
-        if (res.success) {
-          BDRMS.toast('Maligayang pagbabalik, ' + res.resident.firstName + '!', 'success');
-          setTimeout(goAfterLogin, 500);
-        } else {
-          BDRMS.modal({
-            title: res.pending ? '⏳ Naghihintay ng Pag-apruba ni Secretary' : 'Hindi Makapasok',
-            subtitle: 'Barangay Resident Portal • Barangay Wawa',
-            body: '<p style="line-height:1.6; color:var(--text);">' + BDRMS.esc(res.message) + '</p>' +
-                  (res.pending ? '<div style="margin-top:14px; padding:12px; border-radius:8px; background:#fffbeb; border:1px solid #fde68a; font-size:0.84rem; color:#92400e;">💡 <b>Para sa Pagsusuri:</b> Maaari kang mag-login sa <b>Tanggapan ng Kalihim</b> bilang <b>Secretary (Sec. L. Fernandez)</b> upang i-click ang <i>Aprubahan at I-rehistro</i> para sa residenteng ito.</div>' : ''),
-            foot: '<button class="btn btn-primary" data-close>Naiintindihan Ko</button>'
-          });
-        }
-      });
-
-      document.getElementById('residentRegisterForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var regData = {
-          firstName: document.getElementById('regFirst').value.trim(),
-          lastName: document.getElementById('regLast').value.trim(),
-          middleName: document.getElementById('regMiddle').value.trim(),
-          birthdate: document.getElementById('regBirth').value,
-          sex: document.getElementById('regSex').value,
-          civilStatus: document.getElementById('regCivil').value,
-          purok: document.getElementById('regPurok').value,
-          residentSince: document.getElementById('regSince').value,
-          contact: document.getElementById('regContact').value.trim(),
-          username: document.getElementById('regUsername').value.trim(),
-          password: document.getElementById('regPassword').value,
-        };
-
-        var newResident = BDRMS.registerResidentOnline(regData);
-
-        BDRMS.modal({
-          title: '✅ Naisumite ang Iyong Pre-Registration!',
-          subtitle: 'Tanggapan ng Kalihim • Barangay Wawa, Abra de Ilog',
-          body: `
-            <div style="line-height:1.6; color:var(--text);">
-              <p>Salamat, <b>${BDRMS.esc(BDRMS.fullName(newResident))}</b>!</p>
-              <p style="margin-top:8px;">Ang iyong impormasyon para sa <b>${BDRMS.esc(newResident.purok)}, Barangay Wawa</b> ay matagumpay na naitala at kasalukuyang <b>nakapila para sa beripikasyon at opisyal na pag-apruba ni Barangay Secretary Lorna P. Fernandez</b>.</p>
-              <div style="margin-top:14px; padding:12px; border-radius:8px; background:#ecfdf5; border:1px solid #a7f3d0; font-size:0.86rem; color:#065f46;">
-                📌 <b>Ano ang susunod na hakbang?</b><br>
-                Kapag na-verify at naaprubahan na ni Secretary ang iyong paninirahan sa Barangay Wawa, maaari ka nang mag-login gamit ang iyong username (<b>${BDRMS.esc(newResident.username)}</b>) o mobile number.
-              </div>
+      <div id="paneLogin">
+        <p class="auth-note" id="applyNotice" hidden></p>
+        <form method="post" class="auth-form" id="residentLoginForm">
+          <div class="field">
+            <label for="resIdentifier">Username o mobile number</label>
+            <input type="text" id="resIdentifier" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="resPassword">Password</label>
+            <div class="auth-password">
+              <input type="password" id="resPassword" name="password" class="input" required autocomplete="current-password">
+              <button type="button" class="auth-password-toggle" data-password-toggle aria-controls="resPassword" aria-pressed="false" aria-label="Ipakita ang password"></button>
             </div>
-          `,
-          foot: '<button class="btn btn-primary" data-close id="btnProceedToLogin">Bumalik sa Login</button>',
-          onMount: function(m, closeFn) {
-            m.querySelector('#btnProceedToLogin').addEventListener('click', function() {
-              closeFn();
-              showLogin();
-              document.getElementById('resIdentifier').value = newResident.username;
-              document.getElementById('resPassword').value = regData.password;
-            });
-          }
-        });
-      });
-    });
-  </script>
+          </div>
+          <p class="auth-feedback" role="alert" hidden></p>
+          <button type="submit" class="btn auth-submit">Mag-login</button>
+        </form>
+
+        <details class="auth-demo">
+          <summary>Mga demo account</summary>
+          <div class="auth-demo-list">
+            <button type="button" class="auth-demo-option" data-demo-id="09171234561" data-demo-password="resident123">Maria Reyes <span>Purok 1</span></button>
+            <button type="button" class="auth-demo-option" data-demo-id="09181234562" data-demo-password="resident123">Jose Mendoza <span>Purok 2</span></button>
+            <button type="button" class="auth-demo-option" data-demo-id="09191234563" data-demo-password="resident123">Ana Villanueva <span>Purok 3</span></button>
+            <button type="button" class="auth-demo-option" data-demo-id="09179998811" data-demo-password="resident123">Rica Alcantara <span>Pending</span></button>
+          </div>
+        </details>
+      </div>
+
+      <div id="paneRegister" hidden>
+        <p class="auth-note">Susuriin muna ng Kalihim ang iyong pagpapatala bago ka makapag-login.</p>
+        <form id="residentRegisterForm" method="post" class="form-grid auth-register">
+          <div class="field">
+            <label for="regFirst">Unang pangalan</label>
+            <input type="text" id="regFirst" name="firstName" class="input" required autocomplete="given-name">
+          </div>
+          <div class="field">
+            <label for="regLast">Apelyido</label>
+            <input type="text" id="regLast" name="lastName" class="input" required autocomplete="family-name">
+          </div>
+          <div class="field">
+            <label for="regMiddle">Gitnang pangalan <span class="muted">(opsyonal)</span></label>
+            <input type="text" id="regMiddle" name="middleName" class="input" autocomplete="additional-name">
+          </div>
+          <div class="field">
+            <label for="regBirth">Petsa ng kapanganakan</label>
+            <input type="date" id="regBirth" name="birthdate" class="input" required autocomplete="bday">
+          </div>
+          <div class="field">
+            <label for="regSex">Kasarian</label>
+            <select id="regSex" name="sex" class="select" required>
+              <option value="">Pumili</option>
+              <option value="Female">Babae</option>
+              <option value="Male">Lalaki</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="regCivil">Katayuang sibil</label>
+            <select id="regCivil" name="civilStatus" class="select" required>
+              <option value="">Pumili</option>
+              <option value="Single">Walang asawa</option>
+              <option value="Married">May asawa</option>
+              <option value="Widowed">Biyudo / Biyuda</option>
+              <option value="Separated">Hiwalay</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="regPurok">Purok</label>
+            <select id="regPurok" name="purok" class="select" required>
+              <option value="">Pumili</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="regSince">Simula ng paninirahan</label>
+            <input type="date" id="regSince" name="residentSince" class="input" required>
+          </div>
+          <p class="auth-note span-2" id="regResidencyMeter" aria-live="polite" hidden></p>
+          <div class="field">
+            <label for="regContact">Mobile number</label>
+            <input type="tel" id="regContact" name="contact" class="input" placeholder="09XX XXX XXXX" required autocomplete="tel">
+          </div>
+          <div class="field">
+            <label for="regUsername">Username</label>
+            <input type="text" id="regUsername" name="username" class="input" required autocomplete="username" autocapitalize="none" spellcheck="false">
+          </div>
+          <div class="field span-2">
+            <label for="regPassword">Password</label>
+            <div class="auth-password">
+              <input type="password" id="regPassword" name="password" class="input" minlength="6" required autocomplete="new-password" aria-describedby="regPasswordHint">
+              <button type="button" class="auth-password-toggle" data-password-toggle aria-controls="regPassword" aria-pressed="false" aria-label="Ipakita ang password"></button>
+            </div>
+            <span class="hint" id="regPasswordHint">Hindi bababa sa 6 na karakter.</span>
+          </div>
+          <p class="auth-feedback span-2" role="alert" hidden></p>
+          <button type="submit" class="btn auth-submit span-2">Isumite ang pagpapatala</button>
+        </form>
+      </div>
+
+      <nav class="auth-other" aria-label="Iba pang portal">
+        <a href="secretary-login.html">Portal ng Kalihim</a>
+      </nav>
+    </section>
+  </main>
+  <script src="/js/store.js"></script>
+  <script src="/js/auth.js"></script>
 </body>
 </html>

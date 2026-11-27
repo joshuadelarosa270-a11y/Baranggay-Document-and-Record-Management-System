@@ -1,0 +1,205 @@
+.main-content .block {
+  padding-block: clamp(28px, 5.2vw, 62px);
+  scroll-margin-top: 74px;
+}
+
+.public-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 18px;
+}
+
+.public-section-head h2 {
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+}
+
+.public-section-head p {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+
+.service-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.service-filters .filter-tab {
+  margin: 0;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: .85rem;
+}
+
+.public-search-state:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  font-size: .88rem;
+}
+
+.public-search-state span { overflow-wrap: anywhere; }
+
+.main-content .docs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.catalog-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: clamp(12px, 2vw, 18px);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.catalog-card-top,
+.catalog-actions {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.catalog-card-top {
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.catalog-icon {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  height: 37px;
+  color: #116044;
+  background: #eaf6ef;
+  border-radius: 9px;
+}
+
+.catalog-icon svg { width: 19px; height: 19px; }
+.catalog-card h3 { font-size: 1rem; overflow-wrap: anywhere; }
+.catalog-card p { margin-top: 3px; color: var(--text-muted); font-size: .83rem; }
+
+.catalog-actions {
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+.catalog-empty {
+  grid-column: 1 / -1;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+#docsPager {
+  margin-top: 10px;
+}
+
+.public-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 28px;
+  padding-inline-start: 1.25rem;
+}
+
+.public-steps li { padding-inline-start: 4px; }
+.public-steps li::marker { color: #116044; font-weight: 700; }
+.public-steps p { color: var(--text-muted); font-size: .85rem; }
+
+.public-register-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 13px;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border-radius: 11px;
+  background: #f1f7f3;
+  font-size: .87rem;
+  scroll-margin-top: 84px;
+}
+
+.tracker-disclosure {
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+}
+
+.tracker-disclosure summary {
+  width: fit-content;
+  font-size: .84rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.tracker-disclosure .quick-ref-chips,
+.tracker-disclosure .device-list { margin-top: 8px; }
+
+#directory .directory-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+#directory .dir-card { min-width: 0; padding: 14px; overflow-wrap: anywhere; }
+#hybrid .public-section-head { margin-bottom: 0; }
+
+footer.public-footer {
+  margin-top: 0;
+  padding-block: 22px;
+}
+
+.public-footer-grid,
+.public-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+}
+
+.public-footer-grid {
+  justify-content: space-between;
+}
+
+.public-footer p,
+.public-footer-links {
+  color: var(--text-muted);
+  font-size: .84rem;
+}
+
+.public-footer-links a:hover,
+.public-footer-links button:hover {
+  color: var(--primary-strong);
+  text-decoration: underline;
+}
+
+@media (max-width: 780px) {
+  .main-content .docs-grid,
+  .public-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 510px) {
+  .main-content .docs-grid,
+  #directory .directory-grid { grid-template-columns: 1fr; }
+  .public-steps { column-gap: 23px; }
+  .public-steps p { line-height: 1.45; }
+}
+
+@media (max-width: 360px) {
+  .public-steps { grid-template-columns: 1fr; }
+}

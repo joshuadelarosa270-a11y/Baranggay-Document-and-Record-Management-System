@@ -2,7 +2,9 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT || 3000);
+const HOST = '127.0.0.1';
+let activePort = PORT;
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -32,6 +34,28 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}/`);
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE' && activePort < PORT + 10) {
+    activePort += 1;
+    server.listen(activePort, HOST);
+    return;
+  }
+  console.error(`Cannot start server: ${err.message}`);
+  process.exitCode = 1;
 });
+
+server.on('listening', () => {
+  const url = `http://${HOST}:${activePort}/`;
+  console.log(`Server running at ${url}`);
+  console.log('Keep this window open. Press Ctrl+C to stop.');
+  if (process.argv.includes('--open') && process.platform === 'win32') {
+    const browser = require('child_process').spawn('cmd.exe', ['/d', '/c', 'start', '', url], {
+      windowsHide: true,
+      stdio: 'ignore',
+    });
+    browser.on('error', () => console.log(`Open this address in your browser: ${url}`));
+    browser.unref();
+  }
+});
+
+server.listen(activePort, HOST);

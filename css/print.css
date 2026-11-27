@@ -200,15 +200,18 @@
 
 /* Print Media Query */
 @media print {
+  body.has-modal { overflow: visible; }
   body * {
     visibility: hidden;
   }
+  .modal-backdrop[inert] { display: none !important; }
   .modal-backdrop, .modal {
     position: static !important;
     background: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
     max-width: 100% !important;
+    max-height: none !important;
     width: 100% !important;
     inset: auto !important;
     overflow: visible !important;
@@ -219,10 +222,10 @@
   .modal-body {
     padding: 0 !important;
   }
-  .certificate, .certificate * {
+  .certificate, .certificate *, .printable-claim, .printable-claim * {
     visibility: visible;
   }
-  .certificate {
+  .certificate, .printable-claim {
     position: absolute;
     left: 0;
     top: 0;
@@ -233,4 +236,5 @@
     border: none;
     box-shadow: none;
   }
+  .printable-claim { max-width: 580px !important; }
 }

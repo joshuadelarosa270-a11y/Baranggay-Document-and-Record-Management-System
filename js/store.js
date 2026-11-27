@@ -174,7 +174,8 @@ const BDRMS = (() => {
   };
   const monthsBetween = (fromISO, to = new Date()) => {
     if (!fromISO) return 0;
-    const f = new Date(fromISO);
+    const f = /^\d{4}-\d{2}-\d{2}$/.test(fromISO) ? new Date(fromISO + 'T00:00:00') : new Date(fromISO);
+    if (Number.isNaN(f.getTime())) return 0;
     let m = (to.getFullYear() - f.getFullYear()) * 12 + (to.getMonth() - f.getMonth());
     if (to.getDate() < f.getDate()) m--;
     return Math.max(0, m);
@@ -441,11 +442,12 @@ const BDRMS = (() => {
 
   /* ---------- Staff Session ---------- */
   const SESSION_TIMEOUT = 30 * 60 * 1000;
-  function login(username, password) {
-    const u = data().users.find((x) => x.username === username.trim().toLowerCase() && x.password === password);
+  function login(username, password, role) {
+    const u = data().users.find((x) => x.username === username.trim().toLowerCase() &&
+      x.password === password && (!role || x.role === role));
     if (!u) return null;
-    sessionStorage.setItem(SESSION_STAFF_KEY, JSON.stringify({ username: u.username, last: Date.now() }));
     log(u, 'Staff logged in');
+    sessionStorage.setItem(SESSION_STAFF_KEY, JSON.stringify({ username: u.username, last: Date.now() }));
     return u;
   }
   function currentUser() {
@@ -462,28 +464,32 @@ const BDRMS = (() => {
   const isAdmin = (u = currentUser()) => !!u && u.role === 'admin';
 
   /* ---------- Resident Session (Dedicated Resident Portal) ---------- */
-  function loginResident(identifier, password) {
-    const idClean = identifier.trim().toLowerCase();
-    const phoneClean = identifier.replace(/\D/g, '');
-    const r = data().residents.find((x) =>
-      (x.username && x.username.toLowerCase() === idClean) ||
-      (x.contact && x.contact.replace(/\D/g, '') === phoneClean) ||
-      (x.email && x.email.toLowerCase() === idClean)
-    );
-    if (!r) {
-      return {
-        success: false,
-        notFound: true,
-        message: 'Hindi nakita ang resident account sa opisyal na rehistro ng Barangay Wawa. Magsumite ng pre-registration o lumapit kay Secretary Lorna Fernandez upang mairehistro.'
-      };
-    }
+  function normalizePhone(value) {
+    const text = String(value || '').trim();
+    if (!/^\+?[\d\s().-]+$/.test(text)) return '';
+    return text.replace(/\D/g, '').replace(/^63(9\d{9})$/, '0$1');
+  }
 
-    // Strict validation: resident MUST be verified / approved by Secretary
-    if (!r.verified || r.status === 'pending_approval') {
+  function findResidentByIdentifier(identifier) {
+    const normalized = identifier.trim().toLowerCase();
+    if (!normalized) return null;
+    const phone = normalizePhone(normalized);
+    return data().residents.find((resident) =>
+      resident.username?.toLowerCase() === normalized ||
+      resident.email?.toLowerCase() === normalized ||
+      (phone && normalizePhone(resident.contact) === phone)
+    ) || null;
+  }
+
+  const canSignInResident = (resident) => resident?.verified &&
+    resident.status !== 'pending_approval' && resident.status !== 'rejected';
+
+  function loginResident(identifier, password) {
+    const r = findResidentByIdentifier(identifier);
+    if (!r || !r.password || r.password !== password) {
       return {
         success: false,
-        pending: true,
-        message: 'Hindi pa aprubado: Ang iyong account ay kasalukuyan pang sinusuri ni Barangay Secretary Lorna Fernandez. Hintayin ang pag-apruba ng Kalihim o magsadya sa Barangay Hall bago mag-login.'
+        message: 'Pakisuri ang username o mobile number at ang iyong password.'
       };
     }
 
@@ -491,16 +497,20 @@ const BDRMS = (() => {
       return {
         success: false,
         rejected: true,
-        message: `Hindi naaprubahan ang rehistrasyon: ${r.remarks || 'Hindi natukoy na naninirahan sa Barangay Wawa'}. Makipag-ugnayan sa Tanggapan ng Kalihim.`
+        message: 'Hindi naaprubahan ang pagpapatala. Makipag-ugnayan sa Tanggapan ng Kalihim.'
       };
     }
 
-    if (r.password !== password && password !== 'resident123') {
-      return { success: false, message: 'Maling password. Pakisuri muli ang iyong password.' };
+    if (!canSignInResident(r)) {
+      return {
+        success: false,
+        pending: true,
+        message: 'Sinusuri pa ng Kalihim ang iyong pagpapatala. Maaari kang mag-login kapag naaprubahan na ito.'
+      };
     }
 
-    sessionStorage.setItem(SESSION_RESIDENT_KEY, JSON.stringify({ residentId: r.id, last: Date.now() }));
     log({ short: fullName(r), role: 'resident' }, `Resident logged into portal`, r.id);
+    sessionStorage.setItem(SESSION_RESIDENT_KEY, JSON.stringify({ residentId: r.id, last: Date.now() }));
     return { success: true, resident: r };
   }
 
@@ -508,7 +518,10 @@ const BDRMS = (() => {
     try {
       const s = JSON.parse(sessionStorage.getItem(SESSION_RESIDENT_KEY));
       if (!s) return null;
-      return data().residents.find((r) => r.id === s.residentId) || null;
+      const resident = data().residents.find((r) => r.id === s.residentId);
+      if (canSignInResident(resident)) return resident;
+      sessionStorage.removeItem(SESSION_RESIDENT_KEY);
+      return null;
     } catch { return null; }
   }
 
@@ -518,16 +531,48 @@ const BDRMS = (() => {
     sessionStorage.removeItem(SESSION_RESIDENT_KEY);
   }
 
-  // Resident submits pre-registration online (Requires Secretary approval to activate login)
-  function registerResidentOnline(regData) {
+  function validateResidentRegistration(regData, requireBirthdate) {
     if (!PUROKS.includes(regData.purok)) {
       throw new Error('Dapat ay naninirahan sa Barangay Wawa (Purok 1 hanggang Purok 7).');
     }
+    if (!regData.firstName?.trim() || !regData.lastName?.trim()) {
+      throw new Error('Ilagay ang iyong unang pangalan at apelyido.');
+    }
+    const username = regData.username?.trim().toLowerCase();
+    const contact = normalizePhone(regData.contact);
+    if (!username) throw new Error('Maglagay ng username.');
+    if (!/^09\d{9}$/.test(contact)) throw new Error('Maglagay ng wastong mobile number (09XX XXX XXXX).');
+    if (!regData.password || regData.password.length < 6) {
+      throw new Error('Gumamit ng password na may hindi bababa sa 6 na karakter.');
+    }
+
+    const now = new Date();
+    const validPastDate = (value) => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+      const date = new Date(value + 'T00:00:00');
+      return date <= now && date.getMonth() + 1 === Number(value.slice(5, 7)) &&
+        date.getDate() === Number(value.slice(8, 10));
+    };
+    if ((requireBirthdate || regData.birthdate) && !validPastDate(regData.birthdate)) {
+      throw new Error('Maglagay ng wastong petsa ng kapanganakan.');
+    }
+    if (!validPastDate(regData.residentSince) || (regData.birthdate && regData.residentSince < regData.birthdate)) {
+      throw new Error('Suriin ang petsa ng simula ng paninirahan.');
+    }
+    if (findResidentByIdentifier(username) || findResidentByIdentifier(contact)) {
+      throw new Error('May rehistradong gumagamit na ng username o mobile number na ito.');
+    }
+    return { username, contact };
+  }
+
+  // Resident submits pre-registration online (Requires Secretary approval to activate login)
+  function registerResidentOnline(regData) {
+    const { username, contact } = validateResidentRegistration(regData, true);
     const id = uid('res');
     const newRes = {
       id,
-      username: regData.username ? regData.username.trim().toLowerCase() : `res_${Date.now().toString(36)}`,
-      password: regData.password || 'resident123',
+      username,
+      password: regData.password,
       firstName: regData.firstName.trim(),
       middleName: (regData.middleName || '').trim(),
       lastName: regData.lastName.trim(),
@@ -537,7 +582,7 @@ const BDRMS = (() => {
       civilStatus: regData.civilStatus || 'Single',
       purok: regData.purok,
       address: `${regData.purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
-      contact: regData.contact.trim(),
+      contact,
       email: (regData.email || '').trim(),
       residentSince: regData.residentSince,
       verified: false,
@@ -555,15 +600,13 @@ const BDRMS = (() => {
 
   // Secretary directly encodes and officially registers a resident (Instantly active login)
   function registerResidentBySecretary(regData, secretaryUser) {
-    if (!PUROKS.includes(regData.purok)) {
-      throw new Error('Dapat ay naninirahan sa Barangay Wawa (Purok 1 hanggang Purok 7).');
-    }
+    const { username, contact } = validateResidentRegistration(regData, false);
     const id = uid('res');
     const secName = secretaryUser ? (secretaryUser.short || secretaryUser.name) : 'Sec. L. Fernandez';
     const newRes = {
       id,
-      username: regData.username ? regData.username.trim().toLowerCase() : `res_${Date.now().toString(36)}`,
-      password: regData.password || 'resident123',
+      username,
+      password: regData.password,
       firstName: regData.firstName.trim(),
       middleName: (regData.middleName || '').trim(),
       lastName: regData.lastName.trim(),
@@ -573,7 +616,7 @@ const BDRMS = (() => {
       civilStatus: regData.civilStatus || 'Single',
       purok: regData.purok,
       address: `${regData.purok}, Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
-      contact: regData.contact.trim(),
+      contact,
       email: (regData.email || '').trim(),
       residentSince: regData.residentSince,
       verified: true,
@@ -661,37 +704,75 @@ const BDRMS = (() => {
     setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, 3600);
   }
 
+  const modalStack = [];
+  let modalSequence = 0;
+
   function modal({ title, subtitle = '', body, foot = '', wide = false, onMount }) {
+    const opener = document.activeElement;
+    const titleId = 'modal-title-' + ++modalSequence;
     const wrap = document.createElement('div');
     wrap.className = 'modal-backdrop';
     wrap.innerHTML = `
-      <div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
-        <div class="modal-head"><div><h3>${title}</h3>${subtitle ? `<p>${subtitle}</p>` : ''}</div>
-          <button class="icon-btn" data-close aria-label="Close">${ICONS.x}</button></div>
+      <div class="modal ${wide ? 'wide' : ''}" role="dialog" aria-modal="true" aria-labelledby="${titleId}" tabindex="-1">
+        <div class="modal-head"><div><h3 id="${titleId}">${title}</h3>${subtitle ? `<p>${subtitle}</p>` : ''}</div>
+          <button type="button" class="icon-btn" data-close aria-label="Isara">${ICONS.x}</button></div>
         <div class="modal-body">${body}</div>
         ${foot ? `<div class="modal-foot">${foot}</div>` : ''}
       </div>`;
-    const close = () => { wrap.remove(); document.removeEventListener('keydown', onKey); };
-    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    const dialog = wrap.querySelector('.modal');
+    const close = () => {
+      const index = modalStack.indexOf(wrap);
+      if (index < 0) return;
+      const wasActive = wrap === modalStack.at(-1);
+      modalStack.splice(index, 1);
+      wrap.remove();
+      document.removeEventListener('keydown', onKey);
+      const top = modalStack.at(-1);
+      if (top) top.inert = false;
+      else document.body.classList.remove('has-modal');
+      if (wasActive && opener?.isConnected) opener.focus({ preventScroll: true });
+      if (wasActive && top && !top.contains(document.activeElement)) top.querySelector('.modal').focus();
+    };
+    const onKey = (e) => {
+      if (wrap !== modalStack.at(-1)) return;
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        close();
+      }
+      if (e.key !== 'Tab') return;
+      const focusable = Array.from(dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]'))
+        .filter(element => !element.disabled && element.tabIndex >= 0 && element.getClientRects().length);
+      const edge = e.shiftKey ? focusable[0] : focusable.at(-1);
+      if (!focusable.length || !focusable.includes(document.activeElement) || document.activeElement === edge) {
+        e.preventDefault();
+        (e.shiftKey ? focusable.at(-1) : focusable[0])?.focus();
+      }
+    };
     wrap.addEventListener('click', (e) => { if (e.target === wrap || e.target.closest('[data-close]')) close(); });
     document.addEventListener('keydown', onKey);
+    const previous = modalStack.at(-1);
+    if (previous) previous.inert = true;
+    modalStack.push(wrap);
+    document.body.classList.add('has-modal');
     document.body.appendChild(wrap);
-    if (onMount) onMount(wrap.querySelector('.modal'), close);
+    if (onMount) onMount(dialog, close);
+    if (!dialog.contains(document.activeElement)) dialog.focus({ preventScroll: true });
     return close;
   }
 
-  function confirmDialog(title, message, okText = 'Confirm', danger = false) {
-    return new Promise((resolve) => {
-      let done = false;
-      const close = modal({
-        title, body: `<p class="muted">${message}</p>`,
-        foot: `<button class="btn btn-ghost" data-close>Cancel</button><button class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-ok>${okText}</button>`,
-        onMount: (m, c) => {
-          m.querySelector('[data-ok]').addEventListener('click', () => { done = true; c(); resolve(true); });
-          m.closest('.modal-backdrop').addEventListener('click', (e) => { if (!done && (e.target.closest('[data-close]') || e.target.classList.contains('modal-backdrop'))) resolve(false); });
-        },
-      });
-      return close;
+  function confirmDialog({ title, message, confirmText, cancelText = 'Kanselahin', danger = false, onConfirm }) {
+    return modal({
+      title: esc(title),
+      body: `<p class="muted">${esc(message)}</p>`,
+      foot: `<button type="button" class="btn btn-ghost" data-close>${esc(cancelText)}</button>
+        <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" data-ok>${esc(confirmText)}</button>`,
+      onMount: (dialog, close) => {
+        dialog.querySelector('[data-close]').focus();
+        dialog.querySelector('[data-ok]').addEventListener('click', () => {
+          close();
+          onConfirm();
+        });
+      },
     });
   }
 

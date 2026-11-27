@@ -10,15 +10,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Mobile Nav Drawer Toggle
   const menuToggle = document.getElementById('menuToggle');
   const navLinks = document.getElementById('navLinks');
+  function setMenuOpen(open) {
+    if (!navLinks || !menuToggle) return;
+    navLinks.classList.toggle('open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+  }
+
   if (menuToggle && navLinks) {
-    menuToggle.addEventListener('click', (e) => {
-      e.stopPropagation();
-      navLinks.classList.toggle('open');
+    menuToggle.addEventListener('click', () => {
+      setMenuOpen(!navLinks.classList.contains('open'));
     });
 
     document.addEventListener('click', (e) => {
       if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-        navLinks.classList.remove('open');
+        setMenuOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && navLinks.classList.contains('open')) {
+        setMenuOpen(false);
+        menuToggle.focus();
       }
     });
   }
@@ -34,6 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Render Document Showcase Grid with Category Filters & Search
+  BDRMSUI.mountPagination('docsPager', 6, renderDocsGrid);
+  document.getElementById('docsContainer').addEventListener('click', event => {
+    const button = event.target.closest('[data-doc-details]');
+    if (button) showDocRequirementsModal(button.dataset.docDetails);
+  });
   renderDocsGrid();
   initCategoryFilters();
   initHeroSearch();
@@ -52,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const target = document.querySelector(targetId);
       if (target) {
         e.preventDefault();
-        if (navLinks) navLinks.classList.remove('open');
+        setMenuOpen(false);
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
@@ -73,10 +90,8 @@ function updateNavbarUser() {
 
   if (curRes && navResidentBtn) {
     navResidentBtn.href = 'resident-dashboard.html';
-    navResidentBtn.classList.remove('btn-ghost');
-    navResidentBtn.classList.add('btn-primary');
     if (navResidentText) {
-      navResidentText.innerText = `Dashboard (${curRes.firstName})`;
+      navResidentText.innerText = 'Dashboard';
     }
   }
 
@@ -102,13 +117,24 @@ const CATEGORY_MAP = {
 
 function initCategoryFilters() {
   const tabs = document.querySelectorAll('.filter-tab');
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      activeCategory = tab.getAttribute('data-category');
-      renderDocsGrid();
+  function selectCategory(category) {
+    tabs.forEach(tab => {
+      const active = tab.dataset.category === category;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-pressed', String(active));
     });
+    activeCategory = category;
+    BDRMSUI.resetPage('docsPager');
+    renderDocsGrid();
+  }
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => selectCategory(tab.dataset.category));
+  });
+  document.getElementById('clearDocsSearch').addEventListener('click', () => {
+    currentSearchQuery = '';
+    document.getElementById('heroSearchInput').value = '';
+    selectCategory('all');
+    tabs[0].focus();
   });
 }
 
@@ -118,6 +144,13 @@ function initHeroSearch() {
 
   const executeSearch = () => {
     currentSearchQuery = (input?.value || '').trim().toLowerCase();
+    activeCategory = 'all';
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      const active = tab.dataset.category === 'all';
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-pressed', String(active));
+    });
+    BDRMSUI.resetPage('docsPager');
     const servicesSec = document.getElementById('services');
     if (servicesSec) {
       servicesSec.scrollIntoView({ behavior: 'smooth' });
@@ -133,21 +166,17 @@ function initHeroSearch() {
     }
   });
 
-  // Hero Quick Tag Buttons
   document.querySelectorAll('.hero-tag-btn').forEach(tag => {
     tag.addEventListener('click', () => {
-      const q = tag.getAttribute('data-search') || '';
-      if (input) input.value = q;
-      currentSearchQuery = q.toLowerCase();
-      activeCategory = 'all';
-      document.querySelectorAll('.filter-tab').forEach(t => t.classList.toggle('active', t.dataset.category === 'all'));
-      const servicesSec = document.getElementById('services');
-      if (servicesSec) {
-        servicesSec.scrollIntoView({ behavior: 'smooth' });
-      }
-      renderDocsGrid();
+      input.value = tag.dataset.search;
+      executeSearch();
     });
   });
+}
+
+function documentApplyUrl(key, signedIn) {
+  return signedIn ? 'resident-dashboard.html?apply=' + encodeURIComponent(key) :
+    'resident-login.html?from=apply&doc=' + encodeURIComponent(key);
 }
 
 function renderDocsGrid() {
@@ -172,68 +201,33 @@ function renderDocsGrid() {
     return true;
   });
 
-  if (filtered.length === 0) {
-    container.innerHTML = `
-      <div style="grid-column: 1 / -1; text-align: center; padding: 48px 24px;" class="card">
-        <div style="width:54px;height:54px;border-radius:50%;background:#f1f5f9;display:grid;place-items:center;margin:0 auto 14px;color:var(--text-muted);font-size:1.4rem;">
-          🔍
-        </div>
-        <h4 style="font-size:1.15rem;margin-bottom:6px;">Walang Natagpuang Dokumento</h4>
-        <p class="muted" style="font-size: 0.95rem; max-width:440px; margin:0 auto;">Hindi tumutugma ang iyong paghahanap. Subukan ang ibang salita tulad ng "clearance", "residency", o "indigency".</p>
-        <button class="btn btn-primary btn-sm" style="margin-top: 18px;" onclick="activeCategory='all'; currentSearchQuery=''; const inp = document.getElementById('heroSearchInput'); if(inp) inp.value=''; document.querySelectorAll('.filter-tab').forEach(t=>t.classList.toggle('active', t.dataset.category==='all')); renderDocsGrid();">
-          I-reset ang Paghahanap
-        </button>
-      </div>
-    `;
+  const searchState = document.getElementById('docsSearchState');
+  searchState.hidden = !currentSearchQuery;
+  document.getElementById('docsSearchLabel').textContent = 'Hinahanap: ' + currentSearchQuery;
+  const docsPage = BDRMSUI.page('docsPager', filtered);
+
+  if (!docsPage.length) {
+    container.innerHTML = '<p class="catalog-empty">Walang dokumentong tumutugma sa paghahanap.</p>';
     return;
   }
 
-  container.innerHTML = filtered.map(([key, doc]) => {
-    const isFree = doc.fee.toLowerCase().includes('free');
+  const signedIn = Boolean(BDRMS.currentResident());
+  container.innerHTML = docsPage.map(([key, doc]) => {
+    const free = doc.fee.toLowerCase().includes('free');
     return `
-      <div class="doc-card-premium" data-key="${key}">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
-          <div class="doc-icon" style="background:${doc.color.replace('hsl', 'hsla').replace(')', ', 0.12)')};color:${doc.color};border:1px solid ${doc.color.replace('hsl', 'hsla').replace(')', ', 0.25)')}">
-            ${BDRMS.ICONS[doc.icon]}
-          </div>
-          <span class="badge ${isFree ? 'badge-ready' : 'badge-neutral'} no-dot" style="font-size:0.78rem; font-weight:700; padding: 5px 12px;">
-            ${isFree ? 'LIBRE / FREE' : doc.fee}
-          </span>
+      <article class="catalog-card">
+        <div class="catalog-card-top">
+          <span class="catalog-icon" aria-hidden="true">${BDRMS.ICONS[doc.icon]}</span>
+          <span class="badge ${free ? 'badge-ready' : 'badge-neutral'} no-dot">${free ? 'Libre' : BDRMS.esc(doc.fee)}</span>
         </div>
-
-        <h3 style="font-size: 1.18rem; margin-bottom: 6px; color:var(--text);">${BDRMS.esc(doc.name)}</h3>
-        <p style="color:var(--text-soft); font-size: 0.88rem; flex:1; line-height: 1.55; margin-bottom: 16px;">${BDRMS.esc(doc.desc)}</p>
-
-        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom: 16px;">
-          <span class="chip" style="font-size:0.73rem; background:#f1f5f9;">⏱ Proseso: <b>${doc.processing}</b></span>
-          <span class="chip" style="font-size:0.73rem; background:#f1f5f9;">🏠 ${doc.residency ? '6 buwan residency' : 'Walang residency rule'}</span>
+        <h3>${BDRMS.esc(doc.name)}</h3>
+        <p>${BDRMS.esc(doc.processing)}</p>
+        <div class="catalog-actions">
+          <button type="button" class="btn btn-ghost btn-sm" data-doc-details="${key}">Requirements</button>
+          <a href="${documentApplyUrl(key, signedIn)}" class="btn btn-primary btn-sm">Mag-request</a>
         </div>
-
-        <div class="doc-meta" style="display:flex; justify-content:space-between; align-items:center; padding-top:14px; border-top:1px dashed var(--border);">
-          <button type="button" class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); showDocRequirementsModal('${key}')" style="font-size: 0.78rem; padding: 6px 12px;">
-            Requirements
-          </button>
-          <span class="go" style="display:inline-flex; align-items:center; gap:6px; color:var(--primary); font-weight:700; font-size:0.86rem;">
-            Mag-apply ${BDRMS.ICONS.arrowRight}
-          </span>
-        </div>
-      </div>
-    `;
+      </article>`;
   }).join('');
-
-  container.querySelectorAll('.doc-card-premium').forEach(card => {
-    card.addEventListener('click', () => {
-      const key = card.getAttribute('data-key');
-      const cur = BDRMS.currentResident();
-      if (cur) {
-        // Logged in: go to dashboard to apply
-        window.location.href = 'resident-dashboard.html?apply=' + key;
-      } else {
-        // Not logged in: redirect to login with hint
-        window.location.href = 'resident-login.html?from=apply&doc=' + key;
-      }
-    });
-  });
 }
 
 function showDocRequirementsModal(key) {
@@ -272,9 +266,7 @@ function showDocRequirementsModal(key) {
     `,
     foot: `
       <button class="btn btn-ghost" data-close>Isara</button>
-      <button class="btn btn-primary" onclick="(function(){ const cur = BDRMS.currentResident(); if (cur) { window.location.href='resident-dashboard.html?apply=${key}'; } else { window.location.href='resident-login.html?from=apply&doc=${key}'; } document.querySelector('.modal-backdrop')?.remove(); })()">
-        Mag-apply ng Dokumentong Ito
-      </button>
+      <a class="btn btn-primary" href="${documentApplyUrl(key, Boolean(BDRMS.currentResident()))}">Mag-request</a>
     `,
   });
 }
@@ -819,19 +811,16 @@ function resetWizard() {
 
 /* ---------- Request Tracking Logic ---------- */
 function initTracker() {
-  const trackBtn = document.getElementById('btnTrack');
-  if (trackBtn) {
-    trackBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const ref = document.getElementById('trackRef').value.trim();
-      const lastName = document.getElementById('trackLastName').value.trim();
-      if (!ref || !lastName) {
-        BDRMS.toast('Pakilagay pareho ang Reference Number at Apelyido ng aplikante.', 'error');
-        return;
-      }
-      lookupRequest(ref, lastName);
-    });
-  }
+  document.getElementById('trackingForm').addEventListener('submit', event => {
+    event.preventDefault();
+    const ref = document.getElementById('trackRef').value.trim();
+    const lastName = document.getElementById('trackLastName').value.trim();
+    if (!ref || !lastName) {
+      BDRMS.toast('Pakilagay ang reference number at apelyido.', 'error');
+      return;
+    }
+    lookupRequest(ref, lastName);
+  });
 
   // Quick Demo Reference Chips Click Handler
   document.querySelectorAll('.quick-ref-chip').forEach(chip => {
@@ -1044,7 +1033,7 @@ function showClaimStubModal(req) {
     title: 'Opisyal na Claim Stub / Resibo ng Aplikasyon',
     subtitle: `Barangay Wawa, Abra de Ilog, Occidental Mindoro`,
     body: `
-      <div style="border: 2px dashed #94a3b8; border-radius: 14px; padding: 26px; background: #ffffff; color: #0f172a; max-width: 580px; margin: 0 auto; font-family: var(--font-body);">
+      <div class="printable-claim" style="border: 2px dashed #94a3b8; border-radius: 14px; padding: 26px; background: #ffffff; color: #0f172a; max-width: 580px; margin: 0 auto; font-family: var(--font-body);">
         <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 18px;">
           <h3 style="font-size: 1.3rem; margin-bottom: 2px;">BARANGAY WAWA</h3>
           <p style="font-size: 0.84rem; color: #475569;">Bayan ng Abra de Ilog, Lalawigan ng Occidental Mindoro</p>

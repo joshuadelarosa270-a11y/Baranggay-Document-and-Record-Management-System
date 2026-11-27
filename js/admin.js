@@ -5,29 +5,38 @@
    ========================================================================== */
 
 let currentAdmin = null;
-let activeTab = 'tabOverview';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // If user deliberately logged out, redirect to admin-login
-  if (sessionStorage.getItem('bdrms_admin_logout') === 'true') {
-    sessionStorage.removeItem('bdrms_admin_logout');
-    window.location.href = 'admin-login.html';
+  const app = document.querySelector('.admin-app');
+  const user = BDRMS.currentUser();
+  if (!BDRMS.isAdmin(user)) {
+    window.location.replace('admin-login.html');
     return;
   }
-
-  // Ensure Admin session
-  let user = BDRMS.currentUser();
-  if (!user || user.role !== 'admin') {
-    // Auto-login as admin for demo ease
-    user = BDRMS.login('admin', 'admin123');
-  }
-
   currentAdmin = user;
-  initAdminUI(user);
+  initAdminUI(app);
+  app.classList.remove('hidden');
+
+  window.addEventListener('pageshow', () => {
+    if (!BDRMS.isAdmin()) {
+      app.classList.add('hidden');
+      window.location.replace('admin-login.html');
+    }
+  });
 });
 
-function initAdminUI(user) {
-  setupNavigation();
+function initAdminUI(app) {
+  BDRMSUI.mountPagination('requestsPager', 7, renderRequestsTable);
+  BDRMSUI.mountPagination('residentsPager', 8, renderResidentsTable);
+  BDRMSUI.mountPagination('logsPager', 8, renderLogsTable);
+  const renderTab = {
+    tabOverview: renderExecutiveDashboard,
+    tabRequests: renderRequestsTable,
+    tabResidents: renderResidentsTable,
+    tabLogs: renderLogsTable,
+  };
+  BDRMSUI.mountStaffNavigation(app, id => renderTab[id]?.());
+  setupLogout();
   renderExecutiveDashboard();
   setupEventListeners();
 
@@ -40,26 +49,7 @@ function initAdminUI(user) {
   });
 }
 
-/* ---------- Navigation & Tab Switching ---------- */
-function setupNavigation() {
-  document.querySelectorAll('.admin-sidebar .nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.getAttribute('data-tab');
-      switchTab(tabId);
-    });
-  });
-
-  // Mobile sidebar toggle
-  const menuToggle = document.getElementById('adminMenuToggle');
-  const sidebar = document.getElementById('adminSidebar');
-  if (menuToggle && sidebar) {
-    menuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      const expanded = !sidebar.classList.contains('collapsed');
-      menuToggle.setAttribute('aria-expanded', expanded);
-    });
-  }
-
+function setupLogout() {
   // Logout
   const logoutBtn = document.getElementById('btnAdminLogout');
   if (logoutBtn) {
@@ -71,47 +61,14 @@ function setupNavigation() {
         cancelText: 'Kanselahin',
         danger: true,
         onConfirm: () => {
-          sessionStorage.setItem('bdrms_admin_logout', 'true');
           BDRMS.logout('Administrator logged out');
-          BDRMS.toast('Naka-logout na sa Executive Portal.');
-          setTimeout(() => {
-            window.location.href = 'admin-login.html';
-          }, 350);
+          window.location.replace('admin-login.html');
         }
       });
     });
   }
 }
 
-function switchTab(tabId) {
-  activeTab = tabId;
-
-  document.querySelectorAll('.admin-sidebar .nav-item').forEach(item => {
-    if (item.getAttribute('data-tab') === tabId) {
-      item.classList.add('active');
-    } else {
-      item.classList.remove('active');
-    }
-  });
-
-  document.querySelectorAll('.admin-content .tab-pane').forEach(pane => {
-    if (pane.id === tabId) {
-      pane.classList.add('active');
-    } else {
-      pane.classList.remove('active');
-    }
-  });
-
-  if (tabId === 'tabOverview') {
-    renderExecutiveDashboard();
-  } else if (tabId === 'tabRequests') {
-    renderRequestsTable();
-  } else if (tabId === 'tabResidents') {
-    renderResidentsTable();
-  } else if (tabId === 'tabLogs') {
-    renderLogsTable();
-  }
-}
 
 /* ---------- Executive Dashboard & Analytics ---------- */
 function renderExecutiveDashboard() {
@@ -204,19 +161,11 @@ function renderExecutiveDashboard() {
 
 /* ---------- Event Listeners ---------- */
 function setupEventListeners() {
-  const searchInput = document.getElementById('tableSearch');
-  if (searchInput) {
-    searchInput.addEventListener('input', () => renderRequestsTable());
-  }
-
-  const filterDoc = document.getElementById('filterDocType');
-  if (filterDoc) filterDoc.addEventListener('change', () => renderRequestsTable());
-
-  const filterStat = document.getElementById('filterStatus');
-  if (filterStat) filterStat.addEventListener('change', () => renderRequestsTable());
-
-  const filterChan = document.getElementById('filterChannel');
-  if (filterChan) filterChan.addEventListener('change', () => renderRequestsTable());
+  BDRMSUI.bindRequestFilters(renderRequestsTable);
+  document.getElementById('residentSearch').addEventListener('input', () => {
+    BDRMSUI.resetPage('residentsPager');
+    renderResidentsTable();
+  });
 
   // Export CSV
   const btnExport = document.getElementById('btnExportCSV');
@@ -249,88 +198,7 @@ function setupEventListeners() {
 
 /* ---------- Requests Table (Executive Monitoring View) ---------- */
 function renderRequestsTable() {
-  const tbody = document.getElementById('requestsTableBody');
-  if (!tbody) return;
-
-  const store = BDRMS.data();
-  let list = [...(store.requests || [])];
-
-  const searchVal = (document.getElementById('tableSearch')?.value || '').toLowerCase().trim();
-  const docVal = document.getElementById('filterDocType')?.value || 'all';
-  const statVal = document.getElementById('filterStatus')?.value || 'all';
-  const chanVal = document.getElementById('filterChannel')?.value || 'all';
-
-  if (searchVal) {
-    list = list.filter(r =>
-      r.ref.toLowerCase().includes(searchVal) ||
-      BDRMS.fullName(r.applicant).toLowerCase().includes(searchVal) ||
-      (r.applicant.purok && r.applicant.purok.toLowerCase().includes(searchVal)) ||
-      (r.purpose && r.purpose.toLowerCase().includes(searchVal))
-    );
-  }
-
-  if (docVal !== 'all') {
-    list = list.filter(r => r.docType === docVal);
-  }
-
-  if (statVal !== 'all') {
-    list = list.filter(r => r.status === statVal);
-  }
-
-  if (chanVal !== 'all') {
-    list = list.filter(r => r.channel === chanVal);
-  }
-
-  list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  if (list.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 48px 20px; color: var(--muted);">
-          <div style="font-size: 2.2rem; margin-bottom: 8px;">📂</div>
-          <b>Walang nahanap na talaan</b><br>
-          <span style="font-size: 0.85rem;">Subukang baguhin ang mga filter.</span>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = list.map(req => {
-    const doc = BDRMS.DOC_TYPES[req.docType] || { name: req.docType, fee: '—' };
-    const statusDef = BDRMS.STATUSES[req.status] || { cls: 'badge-submitted', desc: '' };
-
-    return `
-      <tr style="cursor: pointer;" onclick="openAdminRequestDetail('${req.id}')">
-        <td><span class="ref-badge">${req.ref}</span></td>
-        <td>
-          <div style="font-weight: 600; color: var(--text);">${BDRMS.esc(BDRMS.fullName(req.applicant))}</div>
-          <div style="font-size: 0.78rem; color: var(--muted);">${BDRMS.esc(req.applicant.purok)}, Brgy. Wawa</div>
-        </td>
-        <td>
-          <div style="font-weight: 500;">${doc.name}</div>
-          <div style="font-size: 0.78rem; color: var(--muted);">${BDRMS.esc(req.purpose || 'Personal Use')}</div>
-        </td>
-        <td>
-          <span class="channel-pill ${req.channel === 'Walk-in' ? 'channel-walkin' : 'channel-online'}">
-            ${req.channel === 'Walk-in' ? '🏛️ Walk-in' : '🌐 Online'}
-          </span>
-        </td>
-        <td>
-          <span class="badge ${statusDef.cls}">${req.status}</span>
-        </td>
-        <td style="font-size: 0.82rem; color: var(--muted);" title="${BDRMS.fmtDateTime(req.createdAt)}">
-          ${BDRMS.timeAgo(req.createdAt)}
-        </td>
-        <td style="text-align: right;" onclick="event.stopPropagation()">
-          <button class="btn btn-ghost btn-sm" onclick="openAdminRequestDetail('${req.id}')" title="Tingnan ang Detalye ng Request (Monitoring)">
-            ${BDRMS.ICONS.eye}
-            Tingnan (Monitor)
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+  BDRMSUI.renderRequests('Tingnan', window.openAdminRequestDetail);
 }
 
 /* ---------- Request Detail Modal (Admin Monitoring View) ---------- */
@@ -371,7 +239,7 @@ window.openAdminRequestDetail = function(reqId) {
       <div>
         <!-- Executive Monitoring Notice -->
         <div class="detail-section">
-          <h4>Katayuan at Subaybay (Monitoring)</h4>
+          <h4>Katayuan</h4>
           <div class="verification-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <span>Kasalukuyang Status:</span>
@@ -379,16 +247,13 @@ window.openAdminRequestDetail = function(reqId) {
             </div>
             <p style="font-size:0.8rem; color:var(--muted); margin-bottom:14px;">${statusDef.desc}</p>
 
-            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; font-size:0.82rem; color:#1e40af; line-height:1.5;">
-              <b>🛡️ Executive Monitoring Mode:</b><br>
-              Naka-login ka bilang <b>System Administrator</b> (Tagasubaybay Lamang). Ang pag-verify, pag-apruba, at pag-release ng dokumentong ito ay <b>eksklusibong isinasagawa ng Kalihim ng Barangay (Sec. Lorna P. Fernandez)</b> upang maiwasan ang conflict of interest.
-            </div>
+            <p class="muted">Ang Kalihim ang nagpoproseso ng request.</p>
           </div>
         </div>
 
         <!-- History / Timeline -->
         <div class="detail-section" style="margin-top:18px;">
-          <h4>Kasaysayan ng Transaksyon (Timeline)</h4>
+          <h4>Kasaysayan</h4>
           <div class="timeline-list">
             ${(req.history || []).map(h => `
               <div class="timeline-item">
@@ -455,37 +320,27 @@ window.printRequestDirect = function(reqId) {
 /* ---------- Residents Registry (Master Directory View) ---------- */
 function renderResidentsTable() {
   const tbody = document.getElementById('residentsTableBody');
-  if (!tbody) return;
-
-  const store = BDRMS.data();
-  const allResidents = store.residents || [];
-  const list = allResidents.filter(r => r.verified && r.status !== 'pending_approval');
-
-  if (list.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align: center; padding: 42px 20px; color: var(--muted);">
-          <div style="font-size: 2rem; margin-bottom: 6px;">👥</div>
-          Walang rehistradong residente sa ngayon.
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = list.map(r => `
-    <tr>
-      <td><span class="ref-badge">${r.id}</span></td>
-      <td>
-        <b>${BDRMS.esc(BDRMS.fullName(r))}</b>
-        <div style="font-size:0.76rem; color:var(--muted);">Username: @${BDRMS.esc(r.username || 'resident')}</div>
+  const query = document.getElementById('residentSearch').value.trim().toLowerCase();
+  const residents = BDRMS.data().residents.filter(resident => resident.verified &&
+    resident.status !== 'pending_approval' && BDRMSUI.matchesResidentSearch(resident, query));
+  const visible = BDRMSUI.page('residentsPager', residents);
+  tbody.innerHTML = visible.length ? visible.map(resident => `
+    <tr role="row">
+      <td role="cell" data-label="Residente">
+        <strong>${BDRMS.esc(BDRMS.fullName(resident))}</strong>
+        <span class="row-detail">${BDRMS.esc(resident.username || '—')}</span>
       </td>
-      <td><b>${BDRMS.esc(r.purok)}</b>, Barangay Wawa</td>
-      <td>${BDRMS.esc(r.contact || '—')}</td>
-      <td>${BDRMS.residencyText(r.residentSince)}</td>
-      <td><span class="badge badge-ready no-dot">✓ Aktibo sa Rehistro</span></td>
-    </tr>
-  `).join('');
+      <td role="cell" data-label="Purok">${BDRMS.esc(resident.purok)}</td>
+      <td role="cell" data-label="Paninirahan">${BDRMS.residencyText(resident.residentSince)}</td>
+      <td role="cell" data-label="Katayuan"><span class="badge badge-ready">Aktibo</span></td>
+      <td role="cell" class="row-action"><button type="button" class="btn btn-ghost btn-sm" data-resident-id="${BDRMS.esc(resident.id)}">Tingnan</button></td>
+    </tr>`).join('') : '<tr role="row"><td role="cell" colspan="5" class="table-empty">Walang nahanap na residente.</td></tr>';
+  tbody.onclick = event => {
+    const button = event.target.closest('[data-resident-id]');
+    if (!button) return;
+    const resident = residents.find(record => record.id === button.dataset.residentId);
+    if (resident) BDRMSUI.residentDetails(resident);
+  };
 }
 
 /* ---------- System Audit Trail Table ---------- */
@@ -493,12 +348,12 @@ function renderLogsTable() {
   const tbody = document.getElementById('logsTableBody');
   if (!tbody) return;
 
-  const logs = [...(BDRMS.data().logs || [])];
+  const logs = BDRMSUI.page('logsPager', BDRMS.data().logs);
 
   if (logs.length === 0) {
     tbody.innerHTML = `
-      <tr>
-        <td colspan="4" style="text-align: center; padding: 40px 20px; color: var(--muted);">
+      <tr role="row">
+        <td role="cell" colspan="4" class="table-empty">
           Walang naitalang audit log sa ngayon.
         </td>
       </tr>
@@ -513,7 +368,7 @@ function renderLogsTable() {
     else if (l.role === 'resident') roleBadge = '<span class="badge badge-submitted no-dot">Resident</span>';
 
     return `
-      <tr>
+      <tr role="row">
         <td style="font-size:0.82rem; color:var(--muted);">${BDRMS.fmtDateTime(l.at)}</td>
         <td>
           <div style="display:flex; align-items:center; gap:8px;">

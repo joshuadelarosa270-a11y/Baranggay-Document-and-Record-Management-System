@@ -5,62 +5,45 @@
    ========================================================================== */
 
 let currentSecretary = null;
-let activeTab = 'tabRequests';
 let activeResidentsSubtab = 'active';
-let currentDetailModalClose = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if logged out
-  if (sessionStorage.getItem('bdrms_secretary_logout') === 'true') {
-    sessionStorage.removeItem('bdrms_secretary_logout');
-    window.location.href = 'secretary-login.html';
+  const app = document.querySelector('.admin-app');
+  const user = BDRMS.currentUser();
+  if (!BDRMS.isSecretary(user)) {
+    window.location.replace('secretary-login.html');
     return;
   }
-
-  // Ensure Secretary session
-  let user = BDRMS.currentUser();
-  if (!user || user.role !== 'secretary') {
-    // Auto-login as secretary for demo / direct link ease
-    user = BDRMS.login('secretary', 'secretary123');
-  }
-
   currentSecretary = user;
-  initSecretaryUI(user);
+  initSecretaryUI(app);
+  app.classList.remove('hidden');
+
+  window.addEventListener('pageshow', () => {
+    if (!BDRMS.isSecretary()) {
+      app.classList.add('hidden');
+      window.location.replace('secretary-login.html');
+    }
+  });
 });
 
-function initSecretaryUI(user) {
-  setupNavigation();
+function initSecretaryUI(app) {
+  BDRMSUI.mountPagination('requestsPager', 7, renderRequestsTable);
+  BDRMSUI.mountPagination('residentsPager', 8, renderResidentsTable);
+  const renderTab = {
+    tabRequests: renderRequestsTable,
+    tabResidents: renderResidentsTable,
+    tabReports: renderReportsView,
+  };
+  BDRMSUI.mountStaffNavigation(app, id => renderTab[id]?.());
+  setupLogout();
   renderDashboard();
   setupEventListeners();
 
   // Multi-tab store sync
-  document.addEventListener('bdrms:sync', () => {
-    renderDashboard();
-    renderRequestsTable();
-    renderResidentsTable();
-  });
+  document.addEventListener('bdrms:sync', renderDashboard);
 }
 
-/* ---------- Navigation & Tab Switching ---------- */
-function setupNavigation() {
-  document.querySelectorAll('.admin-sidebar .nav-item').forEach(item => {
-    item.addEventListener('click', () => {
-      const tabId = item.getAttribute('data-tab');
-      switchTab(tabId);
-    });
-  });
-
-  // Mobile sidebar toggle
-  const menuToggle = document.getElementById('secretaryMenuToggle');
-  const sidebar = document.getElementById('secretarySidebar');
-  if (menuToggle && sidebar) {
-    menuToggle.addEventListener('click', () => {
-      sidebar.classList.toggle('collapsed');
-      const expanded = !sidebar.classList.contains('collapsed');
-      menuToggle.setAttribute('aria-expanded', expanded);
-    });
-  }
-
+function setupLogout() {
   // Logout
   const logoutBtn = document.getElementById('btnSecretaryLogout');
   if (logoutBtn) {
@@ -72,45 +55,14 @@ function setupNavigation() {
         cancelText: 'Kanselahin',
         danger: true,
         onConfirm: () => {
-          sessionStorage.setItem('bdrms_secretary_logout', 'true');
           BDRMS.logout('Secretary logged out');
-          BDRMS.toast('Naka-logout na sa Tanggapan ng Kalihim.');
-          setTimeout(() => {
-            window.location.href = 'secretary-login.html';
-          }, 350);
+          window.location.replace('secretary-login.html');
         }
       });
     });
   }
 }
 
-function switchTab(tabId) {
-  activeTab = tabId;
-
-  document.querySelectorAll('.admin-sidebar .nav-item').forEach(item => {
-    if (item.getAttribute('data-tab') === tabId) {
-      item.classList.add('active');
-    } else {
-      item.classList.remove('active');
-    }
-  });
-
-  document.querySelectorAll('.admin-content .tab-pane').forEach(pane => {
-    if (pane.id === tabId) {
-      pane.classList.add('active');
-    } else {
-      pane.classList.remove('active');
-    }
-  });
-
-  if (tabId === 'tabRequests') {
-    renderRequestsTable();
-  } else if (tabId === 'tabResidents') {
-    renderResidentsTable();
-  } else if (tabId === 'tabReports') {
-    renderReportsView();
-  }
-}
 
 /* ---------- Dashboard Rendering ---------- */
 function renderDashboard() {
@@ -123,7 +75,7 @@ function renderDashboard() {
   const forAppr = reqs.filter(r => r.status === 'For Approval').length;
   const ready = reqs.filter(r => r.status === 'Ready for Pickup').length;
   const verifiedRes = residents.filter(r => r.verified && r.status !== 'pending_approval').length;
-  const pendingRes = residents.filter(r => !r.verified || r.status === 'pending_approval').length;
+  const pendingRes = residents.filter(r => residentRegistryStatus(r) === 'pending').length;
 
   const setT = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
   setT('statTotal', total);
@@ -153,45 +105,35 @@ function renderDashboard() {
 
   renderRequestsTable();
   renderResidentsTable();
+  if (document.getElementById('tabReports').classList.contains('active')) renderReportsView();
 }
 
 /* ---------- Event Listeners ---------- */
 function setupEventListeners() {
-  // Stat cards filter
-  document.querySelectorAll('.stat-card').forEach(card => {
-    card.addEventListener('click', () => {
-      const status = card.getAttribute('data-filter-status');
-      if (status && status !== 'all') {
-        const filterStatus = document.getElementById('filterStatus');
-        if (filterStatus) {
-          filterStatus.value = status;
-          renderRequestsTable();
-        }
-      } else {
-        const filterStatus = document.getElementById('filterStatus');
-        if (filterStatus) {
-          filterStatus.value = 'all';
-          renderRequestsTable();
-        }
-      }
-      switchTab('tabRequests');
-    });
+  BDRMSUI.bindRequestFilters(renderRequestsTable);
+  document.getElementById('residentSearch').addEventListener('input', () => {
+    BDRMSUI.resetPage('residentsPager');
+    renderResidentsTable();
   });
 
-  // Table filters
-  const searchInput = document.getElementById('tableSearch');
-  if (searchInput) {
-    searchInput.addEventListener('input', () => renderRequestsTable());
-  }
-
-  const filterDoc = document.getElementById('filterDocType');
-  if (filterDoc) filterDoc.addEventListener('change', () => renderRequestsTable());
-
-  const filterStat = document.getElementById('filterStatus');
-  if (filterStat) filterStat.addEventListener('change', () => renderRequestsTable());
-
-  const filterChan = document.getElementById('filterChannel');
-  if (filterChan) filterChan.addEventListener('change', () => renderRequestsTable());
+  const statusFilter = document.getElementById('filterStatus');
+  const statusCards = document.querySelectorAll('[data-filter-status]');
+  const syncStatusCards = () => statusCards.forEach(card => {
+    card.setAttribute('aria-pressed', String(card.dataset.filterStatus === statusFilter.value));
+  });
+  statusCards.forEach(card => {
+    card.addEventListener('click', () => {
+      statusFilter.value = card.dataset.filterStatus;
+      syncStatusCards();
+      BDRMSUI.resetPage('requestsPager');
+      renderRequestsTable();
+    });
+  });
+  statusFilter.addEventListener('change', syncStatusCards);
+  document.querySelector('[data-open-residents]').addEventListener('click', () => {
+    document.querySelector('.sidebar-nav [data-tab="tabResidents"]').click();
+    document.getElementById('residentSearch').focus();
+  });
 
   // Walk-in modal
   const btnWalkin = document.getElementById('btnOpenWalkin');
@@ -205,21 +147,18 @@ function setupEventListeners() {
     btnAddRes.addEventListener('click', openAddResidentModal);
   }
 
-  // Residents subtabs
-  const subActive = document.getElementById('subtabActiveResidents');
-  const subPending = document.getElementById('subtabPendingResidents');
-  if (subActive && subPending) {
-    subActive.addEventListener('click', () => {
-      activeResidentsSubtab = 'active';
-      updateResidentsSubtabsUI();
+  document.querySelectorAll('[data-subtab]').forEach(button => {
+    button.addEventListener('click', () => {
+      activeResidentsSubtab = button.dataset.subtab;
+      document.querySelectorAll('[data-subtab]').forEach(tab => {
+        const isActive = tab === button;
+        tab.classList.toggle('active', isActive);
+        tab.setAttribute('aria-pressed', String(isActive));
+      });
+      BDRMSUI.resetPage('residentsPager');
       renderResidentsTable();
     });
-    subPending.addEventListener('click', () => {
-      activeResidentsSubtab = 'pending';
-      updateResidentsSubtabsUI();
-      renderResidentsTable();
-    });
-  }
+  });
 
   // Export CSV
   const btnExport = document.getElementById('btnExportCSV');
@@ -233,94 +172,7 @@ function setupEventListeners() {
 
 /* ---------- Requests Table ---------- */
 function renderRequestsTable() {
-  const tbody = document.getElementById('requestsTableBody');
-  if (!tbody) return;
-
-  const store = BDRMS.data();
-  let list = [...(store.requests || [])];
-
-  const searchVal = (document.getElementById('tableSearch')?.value || '').toLowerCase().trim();
-  const docVal = document.getElementById('filterDocType')?.value || 'all';
-  const statVal = document.getElementById('filterStatus')?.value || 'all';
-  const chanVal = document.getElementById('filterChannel')?.value || 'all';
-
-  if (searchVal) {
-    list = list.filter(r =>
-      r.ref.toLowerCase().includes(searchVal) ||
-      BDRMS.fullName(r.applicant).toLowerCase().includes(searchVal) ||
-      (r.applicant.purok && r.applicant.purok.toLowerCase().includes(searchVal)) ||
-      (r.purpose && r.purpose.toLowerCase().includes(searchVal))
-    );
-  }
-
-  if (docVal !== 'all') {
-    list = list.filter(r => r.docType === docVal);
-  }
-
-  if (statVal !== 'all') {
-    list = list.filter(r => r.status === statVal);
-  }
-
-  if (chanVal !== 'all') {
-    list = list.filter(r => r.channel === chanVal);
-  }
-
-  // Sort: most recent first
-  list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  if (list.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7" style="text-align: center; padding: 48px 20px; color: var(--muted);">
-          <div style="font-size: 2.2rem; margin-bottom: 8px;">📂</div>
-          <b>Walang nahanap na dokumento</b><br>
-          <span style="font-size: 0.85rem;">Subukang baguhin ang filter o i-clear ang search box.</span>
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  tbody.innerHTML = list.map(req => {
-    const doc = BDRMS.DOC_TYPES[req.docType] || { name: req.docType, fee: '—' };
-    const statusDef = BDRMS.STATUSES[req.status] || { cls: 'badge-submitted', desc: '' };
-    const isNew = req.status === 'Submitted' || req.status === 'For Approval';
-
-    return `
-      <tr class="${isNew ? 'row-highlight' : ''}" style="cursor: pointer;" onclick="openRequestDetail('${req.id}')">
-        <td>
-          <span class="ref-badge">${req.ref}</span>
-        </td>
-        <td>
-          <div style="font-weight: 600; color: var(--text);">${BDRMS.esc(BDRMS.fullName(req.applicant))}</div>
-          <div style="font-size: 0.78rem; color: var(--muted);">${BDRMS.esc(req.applicant.purok)}, Brgy. Wawa</div>
-        </td>
-        <td>
-          <div style="font-weight: 500;">${doc.name}</div>
-          <div style="font-size: 0.78rem; color: var(--muted);">${BDRMS.esc(req.purpose || 'Personal Use')}</div>
-        </td>
-        <td>
-          <span class="channel-pill ${req.channel === 'Walk-in' ? 'channel-walkin' : 'channel-online'}">
-            ${req.channel === 'Walk-in' ? '🏛️ Walk-in' : '🌐 Online'}
-          </span>
-        </td>
-        <td>
-          <span class="badge ${statusDef.cls}">
-            ${req.status}
-          </span>
-        </td>
-        <td style="font-size: 0.82rem; color: var(--muted);" title="${BDRMS.fmtDateTime(req.createdAt)}">
-          ${BDRMS.timeAgo(req.createdAt)}
-        </td>
-        <td style="text-align: right;" onclick="event.stopPropagation()">
-          <button class="btn btn-primary btn-sm" onclick="openRequestDetail('${req.id}')" title="Suriin at Aprubahan ang Request">
-            ${BDRMS.ICONS.signature}
-            Suriin / Aprubahan
-          </button>
-        </td>
-      </tr>
-    `;
-  }).join('');
+  BDRMSUI.renderRequests('Suriin', window.openRequestDetail, true);
 }
 
 /* ---------- Request Detail Modal (Secretary View) ---------- */
@@ -330,8 +182,6 @@ window.openRequestDetail = function(reqId) {
 
   const doc = BDRMS.DOC_TYPES[req.docType] || { name: req.docType, fee: 'Free' };
   const statusDef = BDRMS.STATUSES[req.status] || { cls: '', desc: '' };
-  const user = currentSecretary;
-
   const modalBody = `
     <div class="req-detail-grid">
       <!-- Left Column: Core Info & Applicant -->
@@ -365,7 +215,7 @@ window.openRequestDetail = function(reqId) {
       <!-- Right Column: Verification, Approvals, & Workflow Actions -->
       <div>
         <div class="detail-section">
-          <h4>Pagsusuri at Pag-apruba ni Secretary</h4>
+          <h4>Katayuan at mga aksyon</h4>
           <div class="verification-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <span>Status ng Dokumento:</span>
@@ -376,7 +226,7 @@ window.openRequestDetail = function(reqId) {
             <div style="border-top:1px solid var(--border); padding-top:14px;">
               <b style="font-size:0.82rem; display:block; margin-bottom:8px; color:var(--text-soft);">Aksyon ng Kalihim:</b>
               <div id="secretaryWorkflowActionContainer" style="display:grid; gap:8px;">
-                ${renderWorkflowActions(req, user)}
+                ${renderWorkflowActions(req)}
               </div>
             </div>
           </div>
@@ -384,7 +234,7 @@ window.openRequestDetail = function(reqId) {
 
         <!-- History / Timeline -->
         <div class="detail-section" style="margin-top:18px;">
-          <h4>Kasaysayan ng Transaksyon (Timeline)</h4>
+          <h4>Kasaysayan</h4>
           <div class="timeline-list">
             ${(req.history || []).map(h => `
               <div class="timeline-item">
@@ -421,7 +271,7 @@ window.openRequestDetail = function(reqId) {
     </div>
   `;
 
-  BDRMS.modal({
+  const close = BDRMS.modal({
     title: `Suriin ang Request: ${req.ref}`,
     subtitle: `${doc.name} — ${BDRMS.esc(BDRMS.fullName(req.applicant))}`,
     wide: true,
@@ -435,9 +285,7 @@ window.openRequestDetail = function(reqId) {
     actionContainer.querySelectorAll('button[data-action]').forEach(btn => {
       btn.addEventListener('click', () => {
         const action = btn.getAttribute('data-action');
-        const modalOverlay = document.querySelector('.modal-overlay');
-        const closeModal = () => { if (modalOverlay) modalOverlay.remove(); };
-        handleSecretaryAction(req, action, closeModal);
+        requestWorkflowAction(req, action, close);
       });
     });
   }
@@ -459,27 +307,27 @@ function renderExtraFieldsDetail(req) {
   `;
 }
 
-function renderWorkflowActions(req, user) {
+function renderWorkflowActions(req) {
   const status = req.status;
   const btns = [];
 
   if (status === 'Submitted') {
-    btns.push(`<button class="btn btn-primary btn-block" data-action="verify_and_forward">${BDRMS.ICONS.send} 1-Click Verify at I-forward para sa Approval</button>`);
-    btns.push(`<button class="btn btn-ghost btn-block btn-sm" data-action="verify" style="margin-top:4px;">${BDRMS.ICONS.search} Ilagay sa Under Verification (Kulang pa ang requirements)</button>`);
+    btns.push(`<button class="btn btn-primary btn-block" data-action="verify_and_forward">${BDRMS.ICONS.send} I-verify at i-forward</button>`);
+    btns.push(`<button class="btn btn-ghost btn-block btn-sm" data-action="verify" style="margin-top:4px;">${BDRMS.ICONS.search} Markahan para sa beripikasyon</button>`);
   }
   if (status === 'Under Verification') {
-    btns.push(`<button class="btn btn-primary btn-block" data-action="forward">${BDRMS.ICONS.send} I-forward para sa Huling Pag-apruba</button>`);
+    btns.push(`<button class="btn btn-primary btn-block" data-action="forward">${BDRMS.ICONS.send} I-forward para maaprubahan</button>`);
   }
   if (status === 'For Approval') {
-    btns.push(`<button class="btn btn-primary btn-block" data-action="approve">${BDRMS.ICONS.signature} Aprubahan at Ihanda ang Dokumento (Ready for Pickup)</button>`);
+    btns.push(`<button class="btn btn-primary btn-block" data-action="approve">${BDRMS.ICONS.signature} Aprubahan ang request</button>`);
   }
   if (status === 'Ready for Pickup') {
-    btns.push(`<button class="btn btn-primary btn-block" data-action="release">${BDRMS.ICONS.badgeCheck} Tanggapin ang Bayad at I-release ang Dokumento</button>`);
+    btns.push(`<button class="btn btn-primary btn-block" data-action="release">${BDRMS.ICONS.badgeCheck} I-release ang dokumento</button>`);
   }
 
   // Reject / Return Option
   if (status !== 'Released' && status !== 'Rejected') {
-    btns.push(`<button class="btn btn-danger btn-block btn-sm" data-action="reject" style="margin-top:8px;">${BDRMS.ICONS.x} Tanggihan / Ibalik ang Kahilingan</button>`);
+    btns.push(`<button class="btn btn-danger btn-block btn-sm" data-action="reject" style="margin-top:8px;">${BDRMS.ICONS.x} Tanggihan</button>`);
   }
 
   if (btns.length === 0) {
@@ -489,10 +337,34 @@ function renderWorkflowActions(req, user) {
   return btns.join('');
 }
 
-async function handleSecretaryAction(req, action, closeModal) {
+function requestWorkflowAction(req, action, close) {
+  const fee = BDRMS.DOC_TYPES[req.docType]?.fee || 'Free';
+  if (action === 'reject') {
+    BDRMSUI.requestText({
+      title: 'Tanggihan ang request',
+      label: 'Dahilan ng pagtanggi',
+      confirmText: 'Tanggihan',
+      multiline: true,
+      danger: true,
+      onSubmit: reason => handleSecretaryAction(req, action, close, reason),
+    });
+    return;
+  }
+  if (action === 'release' && !req.orNumber && !fee.includes('Free')) {
+    BDRMSUI.requestText({
+      title: 'I-release ang dokumento',
+      label: 'Official receipt number · Bayad: ' + fee,
+      confirmText: 'I-release',
+      onSubmit: receipt => handleSecretaryAction(req, action, close, receipt),
+    });
+    return;
+  }
+  handleSecretaryAction(req, action, close);
+}
+
+function handleSecretaryAction(req, action, closeModal, value) {
   const user = currentSecretary;
   const now = new Date().toISOString();
-  const doc = BDRMS.DOC_TYPES[req.docType] || { name: req.docType, fee: 'Free' };
 
   if (action === 'verify_and_forward') {
     req.status = 'For Approval';
@@ -522,23 +394,15 @@ async function handleSecretaryAction(req, action, closeModal) {
     BDRMS.log(user, `Approved request ${req.ref}`);
     BDRMS.toast(`Naaprubahan! Handa nang kunin ang dokumento ${req.ref}.`, 'success');
   } else if (action === 'release') {
-    const isFeeFree = doc.fee.includes('Free') || doc.fee === '₱0';
-    let or = req.orNumber;
-
-    if (!isFeeFree && !or) {
-      or = prompt(`Koleksyon ng Bayad: ${doc.fee}\nIlagay ang Official Receipt (OR) Number:`, `OR-2026-${Math.floor(1000 + Math.random() * 9000)}`);
-      if (or === null) return;
-    }
-
     req.status = 'Released';
-    req.orNumber = or || 'FREE-RA11261';
+    req.orNumber = value || req.orNumber || 'FREE-RA11261';
+    req.paymentStatus = req.orNumber.startsWith('FREE') || req.orNumber.startsWith('EXEMPT') ? 'Exempt' : 'Paid';
     req.releasedAt = now;
     req.history.push({ status: 'Released', by: user.short, at: now, note: `Document issued and released. OR# ${req.orNumber}` });
     BDRMS.log(user, `Released document ${req.ref} with OR# ${req.orNumber}`);
     BDRMS.toast(`Matagumpay na na-release ang dokumento! OR# ${req.orNumber}`, 'success');
   } else if (action === 'reject') {
-    const reason = prompt('Ilagay ang opisyal na dahilan ng pagtanggi:', 'Kulang ang patunay ng paninirahan o hindi tugma ang rekord.');
-    if (!reason) return;
+    const reason = value;
 
     req.status = 'Rejected';
     req.remarks = reason;
@@ -587,7 +451,7 @@ function openWalkinModal() {
   const body = `
     <form id="formWalkinRequest" style="display:grid; gap:16px;">
       <div class="field">
-        <label>Pumili ng Rehistradong Residente</label>
+        <label for="walkinResidentId">Pumili ng Rehistradong Residente</label>
         <select id="walkinResidentId" class="select" required>
           <option value="">-- Piliin ang Pangalan ng Residente --</option>
           ${residentOptions}
@@ -596,19 +460,19 @@ function openWalkinModal() {
       </div>
 
       <div class="field">
-        <label>Uri ng Dokumento</label>
+        <label for="walkinDocType">Uri ng Dokumento</label>
         <select id="walkinDocType" class="select" required>
           ${docOptions}
         </select>
       </div>
 
       <div class="field">
-        <label>Layunin (Purpose)</label>
+        <label for="walkinPurpose">Layunin (Purpose)</label>
         <input type="text" id="walkinPurpose" class="input" placeholder="hal. Trabaho, Scholarship, ID Requirement" required>
       </div>
 
       <div class="field">
-        <label>Aksyon ni Secretary Pagkatapos I-encode</label>
+        <label for="walkinInitialStatus">Aksyon ni Secretary Pagkatapos I-encode</label>
         <select id="walkinInitialStatus" class="select">
           <option value="Ready for Pickup">Aprubahan Agad (Ready for Pickup / Release)</option>
           <option value="For Approval">Ihanda para sa Review (For Approval)</option>
@@ -619,17 +483,18 @@ function openWalkinModal() {
 
   const foot = `
     <button class="btn btn-ghost" data-close>Kanselahin</button>
-    <button class="btn btn-primary" id="btnSubmitWalkin">I-encode at Isumite</button>
+    <button type="submit" form="formWalkinRequest" class="btn btn-primary">Isumite ang walk-in</button>
   `;
 
-  BDRMS.modal({
+  const close = BDRMS.modal({
     title: '✍️ Mag-encode ng Walk-in Request sa Hall',
     subtitle: 'Tanggapan ng Kalihim — Barangay Wawa, Abra de Ilog',
     body,
     foot,
   });
 
-  document.getElementById('btnSubmitWalkin').addEventListener('click', () => {
+  document.getElementById('formWalkinRequest').addEventListener('submit', event => {
+    event.preventDefault();
     const resId = document.getElementById('walkinResidentId').value;
     const docType = document.getElementById('walkinDocType').value;
     const purpose = document.getElementById('walkinPurpose').value.trim();
@@ -675,151 +540,90 @@ function openWalkinModal() {
     BDRMS.log(currentSecretary, `Encoded walk-in request ${newReq.ref} for ${BDRMS.fullName(resident)}`);
     BDRMS.toast(`Matagumpay na nai-encode ang walk-in request: ${newReq.ref}`, 'success');
 
-    const overlay = document.querySelector('.modal-overlay');
-    if (overlay) overlay.remove();
+    close();
 
     renderDashboard();
   });
 }
 
 /* ---------- Residents Registry ---------- */
-function updateResidentsSubtabsUI() {
-  const subActive = document.getElementById('subtabActiveResidents');
-  const subPending = document.getElementById('subtabPendingResidents');
-  if (subActive && subPending) {
-    if (activeResidentsSubtab === 'active') {
-      subActive.classList.add('active');
-      subPending.classList.remove('active');
-    } else {
-      subPending.classList.add('active');
-      subActive.classList.remove('active');
-    }
-  }
+function residentRegistryStatus(resident) {
+  if (resident.status === 'rejected') return 'rejected';
+  return resident.verified && resident.status !== 'pending_approval' ? 'active' : 'pending';
 }
 
 function renderResidentsTable() {
   const tbody = document.getElementById('residentsTableBody');
-  const thead = document.getElementById('residentsTableHead');
-  if (!tbody) return;
-
-  const store = BDRMS.data();
-  const allResidents = store.residents || [];
-
-  let list = [];
-  if (activeResidentsSubtab === 'active') {
-    list = allResidents.filter(r => r.verified && r.status !== 'pending_approval');
-    if (thead) {
-      thead.innerHTML = `
-        <tr>
-          <th>Resident ID</th>
-          <th>Buong Pangalan</th>
-          <th>Purok sa Wawa</th>
-          <th>Numero ng Telepono</th>
-          <th>Tagal ng Paninirahan</th>
-          <th>Katayuan</th>
-        </tr>
-      `;
-    }
-  } else {
-    list = allResidents.filter(r => !r.verified || r.status === 'pending_approval');
-    if (thead) {
-      thead.innerHTML = `
-        <tr>
-          <th>Petsa ng Pre-reg</th>
-          <th>Buong Pangalan</th>
-          <th>Purok sa Wawa</th>
-          <th>Numero ng Telepono</th>
-          <th>Dokumento / ID</th>
-          <th style="text-align:right;">Aksyon ni Secretary</th>
-        </tr>
-      `;
-    }
-  }
-
-  if (list.length === 0) {
-    const msg = activeResidentsSubtab === 'active'
-      ? 'Walang rehistradong residente sa ngayon.'
-      : 'Walang naghihintay na rehistrasyon. Lahat ng resident pre-registration ay nasuri at naaprubahan na.';
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align: center; padding: 42px 20px; color: var(--muted);">
-          <div style="font-size: 2rem; margin-bottom: 6px;">👥</div>
-          ${msg}
-        </td>
-      </tr>
-    `;
-    return;
-  }
-
-  if (activeResidentsSubtab === 'active') {
-    tbody.innerHTML = list.map(r => `
-      <tr>
-        <td><span class="ref-badge">${r.id}</span></td>
-        <td>
-          <b>${BDRMS.esc(BDRMS.fullName(r))}</b>
-          <div style="font-size:0.76rem; color:var(--muted);">User: @${BDRMS.esc(r.username || 'resident')}</div>
-        </td>
-        <td>${BDRMS.esc(r.purok)}, Brgy. Wawa</td>
-        <td>${BDRMS.esc(r.contact || '—')}</td>
-        <td>${BDRMS.residencyText(r.residentSince)}</td>
-        <td><span class="badge badge-ready no-dot">✓ Opisyal na Rehistrado</span></td>
-      </tr>
-    `).join('');
-  } else {
-    tbody.innerHTML = list.map(r => `
-      <tr style="background:#fffbeb;">
-        <td style="font-size:0.82rem; color:var(--muted);">${BDRMS.fmtDate(r.registeredAt || new Date().toISOString())}</td>
-        <td>
-          <b>${BDRMS.esc(BDRMS.fullName(r))}</b>
-          <div style="font-size:0.76rem; color:var(--muted);">Username: @${BDRMS.esc(r.username)}</div>
-        </td>
-        <td><b>${BDRMS.esc(r.purok)}</b>, Brgy. Wawa</td>
-        <td>${BDRMS.esc(r.contact || '—')}</td>
-        <td>
-          <div style="font-size:0.82rem;">${BDRMS.esc(r.idType || 'PhilSys')}</div>
-          <div style="font-size:0.75rem; color:var(--muted);"># ${BDRMS.esc(r.idNumber || '—')}</div>
-        </td>
-        <td style="text-align:right;">
-          <button class="btn btn-primary btn-sm" onclick="approveResident('${r.id}')" title="Aprubahan at i-activate ang resident account">
-            ${BDRMS.ICONS.badgeCheck} Aprubahan at I-rehistro
-          </button>
-          <button class="btn btn-danger btn-sm" onclick="rejectResident('${r.id}')" style="margin-left:6px;" title="Tanggihan kung hindi lehitimong residente">
-            ${BDRMS.ICONS.x} Tanggihan
-          </button>
-        </td>
-      </tr>
-    `).join('');
-  }
+  const query = document.getElementById('residentSearch').value.trim().toLowerCase();
+  const residents = BDRMS.data().residents.filter(resident => residentRegistryStatus(resident) === activeResidentsSubtab &&
+    BDRMSUI.matchesResidentSearch(resident, query));
+  const visible = BDRMSUI.page('residentsPager', residents);
+  const labels = {
+    active: ['Aktibo', 'badge-ready'],
+    pending: ['For review', 'badge-approval'],
+    rejected: ['Tinanggihan', 'badge-rejected'],
+  };
+  const [label, badge] = labels[activeResidentsSubtab];
+  tbody.innerHTML = visible.length ? visible.map(resident => `
+    <tr role="row">
+      <td role="cell" data-label="Residente">
+        <strong>${BDRMS.esc(BDRMS.fullName(resident))}</strong>
+        <span class="row-detail">${BDRMS.esc(resident.username || '—')}</span>
+      </td>
+      <td role="cell" data-label="Purok">${BDRMS.esc(resident.purok)}</td>
+      <td role="cell" data-label="Paninirahan">${BDRMS.residencyText(resident.residentSince)}</td>
+      <td role="cell" data-label="Katayuan"><span class="badge ${badge}">${label}</span></td>
+      <td role="cell" class="row-action">
+        <button type="button" class="btn ${activeResidentsSubtab === 'pending' ? 'btn-primary' : 'btn-ghost'} btn-sm" data-resident-id="${BDRMS.esc(resident.id)}">${activeResidentsSubtab === 'pending' ? 'Suriin' : 'Tingnan'}</button>
+      </td>
+    </tr>`).join('') : '<tr role="row"><td role="cell" colspan="5" class="table-empty">Walang nahanap na residente.</td></tr>';
+  tbody.onclick = event => {
+    const button = event.target.closest('[data-resident-id]');
+    if (!button) return;
+    const resident = residents.find(record => record.id === button.dataset.residentId);
+    if (!resident) return;
+    if (residentRegistryStatus(resident) === 'active') BDRMSUI.residentDetails(resident);
+    else reviewResident(resident);
+  };
 }
 
-window.approveResident = function(resId) {
-  const resident = BDRMS.data().residents.find(r => r.id === resId);
-  if (!resident) return;
-
-  BDRMS.confirmDialog({
-    title: 'Aprubahan ang Rehistrasyon ng Residente',
-    message: `Kumpirmahin na na-verify ni Secretary Lorna Fernandez ang paninirahan ni <b>${BDRMS.fullName(resident)}</b> sa ${resident.purok}, Barangay Wawa. Magiging aktibo na ang kanyang login.`,
-    confirmText: 'Oo, Aprubahan at I-rehistro',
-    cancelText: 'Kanselahin',
-    onConfirm: () => {
-      BDRMS.approveResidentBySecretary(resId, currentSecretary);
-      BDRMS.toast(`Naaprubahan na! Rehistrado na si ${BDRMS.fullName(resident)} at maaari nang mag-login sa Resident Portal.`, 'success');
-      renderDashboard();
-    }
+function reviewResident(resident) {
+  const rejected = residentRegistryStatus(resident) === 'rejected';
+  BDRMSUI.residentDetails(resident, `
+    <button type="button" class="btn btn-ghost" data-close>Isara</button>
+    ${rejected ? '' : '<button type="button" class="btn btn-danger" data-reject>Tanggihan</button>'}
+    <button type="button" class="btn btn-primary" data-approve>${rejected ? 'Ibalik sa aktibo' : 'Aprubahan'}</button>
+  `, (dialog, closeDetails) => {
+    dialog.querySelector('[data-approve]').addEventListener('click', () => {
+      BDRMS.confirmDialog({
+        title: 'Aprubahan ang pagpapatala',
+        message: 'Kumpirmahing napatunayan ang paninirahan ni ' + BDRMS.fullName(resident) + ' sa Barangay Wawa.',
+        confirmText: 'Aprubahan',
+        onConfirm: () => {
+          BDRMS.approveResidentBySecretary(resident.id, currentSecretary);
+          closeDetails();
+          renderDashboard();
+          BDRMS.toast('Naaprubahan ang pagpapatala.', 'success');
+        },
+      });
+    });
+    dialog.querySelector('[data-reject]')?.addEventListener('click', () => {
+      BDRMSUI.requestText({
+        title: 'Tanggihan ang pagpapatala',
+        label: 'Dahilan ng pagtanggi',
+        confirmText: 'Tanggihan',
+        multiline: true,
+        danger: true,
+        onSubmit: reason => {
+          BDRMS.rejectResidentBySecretary(resident.id, reason, currentSecretary);
+          closeDetails();
+          renderDashboard();
+          BDRMS.toast('Naitala ang pagtanggi.');
+        },
+      });
+    });
   });
-};
-
-window.rejectResident = function(resId) {
-  const resident = BDRMS.data().residents.find(r => r.id === resId);
-  if (!resident) return;
-
-  const reason = prompt('Ilagay ang dahilan ng pagtanggi sa rehistrasyon:', 'Hindi naninirahan sa Barangay Wawa o kulang ang patunay ng tirahan.');
-  if (!reason) return;
-
-  BDRMS.rejectResidentBySecretary(resId, reason, currentSecretary);
-  BDRMS.toast(`Tinanggihan ang rehistrasyon ni ${BDRMS.fullName(resident)}.`, 'error');
-  renderDashboard();
-};
+}
 
 /* ---------- Direct Add Resident Modal ---------- */
 function openAddResidentModal() {
@@ -834,39 +638,39 @@ function openAddResidentModal() {
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
         <div class="field">
-          <label>Pangalan (First Name)</label>
+          <label for="addFirstName">Unang pangalan</label>
           <input type="text" id="addFirstName" class="input" placeholder="hal. Maria" required>
         </div>
         <div class="field">
-          <label>Gitnang Pangalan (Middle Name)</label>
+          <label for="addMiddleName">Gitnang pangalan</label>
           <input type="text" id="addMiddleName" class="input" placeholder="hal. Santos">
         </div>
         <div class="field">
-          <label>Apelyido (Last Name)</label>
+          <label for="addLastName">Apelyido</label>
           <input type="text" id="addLastName" class="input" placeholder="hal. Dela Cruz" required>
         </div>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
         <div class="field">
-          <label>Purok sa Barangay Wawa</label>
+          <label for="addPurok">Purok sa Barangay Wawa</label>
           <select id="addPurok" class="select" required>
             ${purokOptions}
           </select>
         </div>
         <div class="field">
-          <label>Numero ng Telepono</label>
+          <label for="addContact">Numero ng Telepono</label>
           <input type="text" id="addContact" class="input" placeholder="0917-xxx-xxxx" required>
         </div>
       </div>
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
         <div class="field">
-          <label>Petsa ng Simula ng Paninirahan</label>
-          <input type="date" id="addResidentSince" class="input" value="2018-01-15" required>
+          <label for="addResidentSince">Petsa ng Simula ng Paninirahan</label>
+          <input type="date" id="addResidentSince" class="input" required>
         </div>
         <div class="field">
-          <label>Uri ng Valid ID</label>
+          <label for="addIdType">Uri ng Valid ID</label>
           <select id="addIdType" class="select">
             ${idOptions}
           </select>
@@ -875,12 +679,12 @@ function openAddResidentModal() {
 
       <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
         <div class="field">
-          <label>Resident Username (para sa Login)</label>
+          <label for="addUsername">Username</label>
           <input type="text" id="addUsername" class="input" placeholder="hal. maria.delacruz" required>
         </div>
         <div class="field">
-          <label>Default Password</label>
-          <input type="text" id="addPassword" class="input" value="resident123" required>
+          <label for="addPassword">Password</label>
+          <input type="password" id="addPassword" class="input" minlength="6" required autocomplete="new-password">
         </div>
       </div>
     </form>
@@ -888,17 +692,18 @@ function openAddResidentModal() {
 
   const foot = `
     <button class="btn btn-ghost" data-close>Kanselahin</button>
-    <button class="btn btn-primary" id="btnSubmitAddResident">I-rehistro ang Residente</button>
+    <button type="submit" form="formAddResident" class="btn btn-primary">I-rehistro ang Residente</button>
   `;
 
-  BDRMS.modal({
-    title: '✍️ Opisyal na Pagpapatala ng Bagong Residente',
+  const close = BDRMS.modal({
+    title: 'Opisyal na Pagpapatala ng Bagong Residente',
     subtitle: 'Tanggapan ng Kalihim — Barangay Wawa, Abra de Ilog',
     body,
     foot,
   });
 
-  document.getElementById('btnSubmitAddResident').addEventListener('click', () => {
+  document.getElementById('formAddResident').addEventListener('submit', (event) => {
+    event.preventDefault();
     const fn = document.getElementById('addFirstName').value.trim();
     const ln = document.getElementById('addLastName').value.trim();
     const mn = document.getElementById('addMiddleName').value.trim();
@@ -908,11 +713,6 @@ function openAddResidentModal() {
     const idType = document.getElementById('addIdType').value;
     const username = document.getElementById('addUsername').value.trim().toLowerCase();
     const password = document.getElementById('addPassword').value;
-
-    if (!fn || !ln || !contact || !username) {
-      BDRMS.toast('Pakipunan ang lahat ng kinakailangang impormasyon.', 'error');
-      return;
-    }
 
     const regData = {
       firstName: fn,
@@ -927,15 +727,15 @@ function openAddResidentModal() {
       password,
     };
 
-    const res = BDRMS.registerResidentBySecretary(regData, currentSecretary);
-    if (res && res.success) {
-      BDRMS.toast(`Matagumpay na nairehistro si ${fn} ${ln}! Aktibo na ang kanyang login sa Resident Portal.`, 'success');
-      const overlay = document.querySelector('.modal-overlay');
-      if (overlay) overlay.remove();
-      renderDashboard();
-    } else {
-      BDRMS.toast(res.message || 'Hindi mairehistro ang residente.', 'error');
+    try {
+      BDRMS.registerResidentBySecretary(regData, currentSecretary);
+    } catch (error) {
+      BDRMS.toast(error.message, 'error');
+      return;
     }
+    close();
+    BDRMS.toast(`Matagumpay na nairehistro si ${fn} ${ln}! Aktibo na ang kanyang login sa Resident Portal.`, 'success');
+    renderDashboard();
   });
 }
 
@@ -954,7 +754,7 @@ function renderReportsView() {
   if (!container) return;
 
   container.innerHTML = `
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:24px;">
+    <div class="workspace-grid">
       <div class="card" style="padding:22px;">
         <span class="muted" style="font-size:0.8rem; font-weight:600; text-transform:uppercase;">Kabuuang Naiprosesong Dokumento</span>
         <strong style="font-size:2.2rem; display:block; font-family:var(--font-display); color:var(--primary); margin-top:4px;">
@@ -971,15 +771,6 @@ function renderReportsView() {
         <span style="font-size:0.82rem; color:var(--muted);">Opisyal na bayarin mula sa mga clearances at sertipiko</span>
       </div>
 
-      <div class="card" style="padding:22px;">
-        <span class="muted" style="font-size:0.8rem; font-weight:600; text-transform:uppercase;">DILG Compliance Report</span>
-        <div style="margin-top:8px;">
-          <button class="btn btn-primary btn-block" onclick="BDRMS.exportRequestsCSV()">
-            ${BDRMS.ICONS.printer} I-download ang DILG CSV Report
-          </button>
-        </div>
-        <span style="font-size:0.8rem; color:var(--muted); display:block; margin-top:8px;">Format ayon sa pamantayan ng DILG at LGU Abra de Ilog.</span>
-      </div>
     </div>
   `;
 }
